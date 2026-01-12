@@ -67,7 +67,4 @@ if [ -n "${ALIASES+x}" ]; then
     done
 fi
 
-echo "changing default shell to zsh"
-chsh -s $(which zsh)
-
-zsh
+echo "Deploy complete. Run 'zsh' to start using the new config."
