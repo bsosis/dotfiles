@@ -9,7 +9,7 @@ export TERM="xterm-256color"
 
 ZSH_DISABLE_COMPFIX=true
 ZSH_THEME="powerlevel10k/powerlevel10k"
-ZSH=$HOME/.oh-my-zsh
+ZSH=${ZSH:-$HOME/.oh-my-zsh}
 
 plugins=(zsh-autosuggestions zsh-syntax-highlighting zsh-completions zsh-history-substring-search)
 
