@@ -11,7 +11,7 @@ USAGE=$(cat <<-END
 END
 )
 
-export DOT_DIR=$(dirname $(realpath $0))
+export DOT_DIR="$(dirname "$(realpath "$0")")"
 
 VIM="false"
 ALIASES=()
@@ -34,20 +34,20 @@ echo "deploying on machine..."
 echo "using extra aliases: ${ALIASES[@]}"
 
 # Tmux setup
-echo "source $DOT_DIR/config/tmux.conf" > $HOME/.tmux.conf
+echo "source \"$DOT_DIR/config/tmux.conf\"" > $HOME/.tmux.conf
 
 # Vimrc
 if [[ $VIM == "true" ]]; then
     echo "deploying .vimrc"
-    echo "source $DOT_DIR/config/vimrc" > $HOME/.vimrc
+    echo "source \"$DOT_DIR/config/vimrc\"" > $HOME/.vimrc
 fi
 
 # zshrc setup
-echo "source $DOT_DIR/config/zshrc.sh" > $HOME/.zshrc
+echo "source \"$DOT_DIR/config/zshrc.sh\"" > $HOME/.zshrc
 # Append additional alias scripts if specified
 if [ -n "${ALIASES+x}" ]; then
     for alias in "${ALIASES[@]}"; do
-        echo "source $DOT_DIR/config/aliases_${alias}.sh" >> $HOME/.zshrc
+        echo "source \"$DOT_DIR/config/aliases_${alias}.sh\"" >> $HOME/.zshrc
     done
 fi
 

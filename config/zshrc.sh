@@ -1,5 +1,5 @@
-CONFIG_DIR=$(dirname $(realpath ${(%):-%x}))
-DOT_DIR=$CONFIG_DIR/..
+CONFIG_DIR="$(dirname "$(realpath "${(%):-%x}")")"
+DOT_DIR="$CONFIG_DIR/.."
 
 # Instant prompt
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -13,16 +13,16 @@ ZSH=$HOME/.oh-my-zsh
 
 plugins=(zsh-autosuggestions zsh-syntax-highlighting zsh-completions zsh-history-substring-search)
 
-source $ZSH/oh-my-zsh.sh
-source $CONFIG_DIR/aliases.sh
-source $CONFIG_DIR/p10k.zsh
-source $CONFIG_DIR/extras.sh
-source $CONFIG_DIR/key_bindings.sh
+source "$ZSH/oh-my-zsh.sh"
+source "$CONFIG_DIR/aliases.sh"
+source "$CONFIG_DIR/p10k.zsh"
+source "$CONFIG_DIR/extras.sh"
+source "$CONFIG_DIR/key_bindings.sh"
 add_to_path "${DOT_DIR}/custom_bins"
 
 # for uv
-if [ -d "$HOME/.local/bin" ]; then
-  source $HOME/.local/bin/env
+if [ -f "$HOME/.local/bin/env" ]; then
+  source "$HOME/.local/bin/env"
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -60,4 +60,4 @@ if command -v ask-sh &> /dev/null; then
   eval "$(ask-sh --init)"
 fi
 
-cat $CONFIG_DIR/start.txt
+cat "$CONFIG_DIR/start.txt"

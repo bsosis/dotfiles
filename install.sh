@@ -47,7 +47,7 @@ esac
 
 # Installing on linux with apt
 if [ $machine == "Linux" ]; then
-    DOT_DIR=$(dirname $(realpath $0))
+    DOT_DIR="$(dirname "$(realpath "$0")")"
     sudo apt-get update -y
     [ $zsh == true ] && sudo apt-get install -y zsh
     [ $tmux == true ] && sudo apt-get install -y tmux
@@ -83,7 +83,7 @@ elif [ $machine == "Mac" ]; then
         yes | brew install peco
     fi
 
-    DOT_DIR=$(dirname $(realpath $0))
+    DOT_DIR="$(dirname "$(realpath "$0")")"
     [ $zsh == true ] && yes | brew install zsh
     [ $tmux == true ] && yes | brew install tmux
     defaults write -g InitialKeyRepeat -int 10 # normal minimum is 15 (225 ms)
