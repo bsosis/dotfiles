@@ -52,6 +52,7 @@ export ZSH="$USER_VAST/.oh-my-zsh"
 
 # Cluster-specific: shared huggingface cache
 export HF_HOME="/workspace-vast/pretrained_ckpts"
+export HF_TOKEN_PATH="$USER_VAST/.cache/huggingface/token"
 
 # Cluster-specific: uv configuration for cross-node compatibility
 export UV_PYTHON_INSTALL_DIR="$USER_VAST/.uv/python"
