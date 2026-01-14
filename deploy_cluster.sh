@@ -59,8 +59,12 @@ export UV_PYTHON_INSTALL_DIR="$USER_VAST/.uv/python"
 export UV_CACHE_DIR="$USER_VAST/.cache/uv"
 # Configure XDG_DATA_HOME to use VAST storage (used for uv tools, etc.)
 export XDG_DATA_HOME="$USER_VAST/.local/share"
+# Set npm global prefix to VAST storage (for claude-code auto-updates)
+export NPM_CONFIG_PREFIX="$USER_VAST/.npm-global"
+# Use git config from VAST storage for persistence
+export GIT_CONFIG_GLOBAL="$USER_VAST/.gitconfig"
 # Add to PATH
-export PATH="$USER_VAST/.local/bin:$PATH"
+export PATH="$USER_VAST/.npm-global/bin:$USER_VAST/.local/bin:\$PATH"
 # Set temp directory to ~/tmp
 export TMPDIR="$HOME/tmp"
 mkdir -p "$HOME/tmp"
@@ -76,6 +80,13 @@ if [ -n "${ALIASES+x}" ]; then
     for alias in "${ALIASES[@]}"; do
         echo "source \"$DOT_DIR/config/aliases_${alias}.sh\"" >> $HOME/.zshrc
     done
+fi
+
+# Claude Code setup - symlink ~/.claude to VAST storage for persistence
+if [ -d "$USER_VAST/.claude" ]; then
+    rm -rf "$HOME/.claude"
+    ln -sf "$USER_VAST/.claude" "$HOME/.claude"
+    echo "linked ~/.claude -> $USER_VAST/.claude"
 fi
 
 echo "Deploy complete. Run 'zsh' to start using the new config."
