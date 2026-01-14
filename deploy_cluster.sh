@@ -59,6 +59,10 @@ export HF_TOKEN_PATH="$USER_VAST/.cache/huggingface/token"
 export UV_PYTHON_INSTALL_DIR="$USER_VAST/.uv/python"
 export UV_CACHE_DIR="$USER_VAST/.cache/uv"
 
+# Cluster-specific: configure XDG_DATA_HOME to use VAST storage
+# Used for uv tools, etc.
+export XDG_DATA_HOME="$USER_VAST/.local/share"
+
 # Cluster-specific: set temp directory to ~/tmp
 export TMPDIR="$HOME/tmp"
 mkdir -p "$HOME/tmp"
