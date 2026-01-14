@@ -61,7 +61,7 @@ export UV_CACHE_DIR="$USER_VAST/.cache/uv"
 
 # Cluster-specific: set temp directory to ~/tmp
 export TMPDIR="$HOME/tmp"
-mkdir -p "$TMPDIR"
+mkdir -p "$HOME/tmp"
 
 source "$DOT_DIR/config/zshrc.sh"
 EOF
