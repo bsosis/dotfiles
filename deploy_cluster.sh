@@ -50,22 +50,21 @@ cat > $HOME/.zshrc << EOF
 # Cluster-specific: use oh-my-zsh from VAST storage
 export ZSH="$USER_VAST/.oh-my-zsh"
 
-# Cluster-specific: shared huggingface cache
+# Cluster-specific: 
+# Sared huggingface cache
 export HF_HOME="/workspace-vast/pretrained_ckpts"
-# Cluster-specific: save huggingface token to user's VAST storage
+# Save huggingface token to user's VAST storage
 export HF_TOKEN_PATH="$USER_VAST/.cache/huggingface/token"
-
-# Cluster-specific: uv configuration for cross-node compatibility
+# uv configuration for cross-node compatibility
 export UV_PYTHON_INSTALL_DIR="$USER_VAST/.uv/python"
 export UV_CACHE_DIR="$USER_VAST/.cache/uv"
-
-# Cluster-specific: configure XDG_DATA_HOME to use VAST storage
-# Used for uv tools, etc.
+# Configure XDG_DATA_HOME to use VAST storage (used for uv tools, etc.)
 export XDG_DATA_HOME="$USER_VAST/.local/share"
-
-# Cluster-specific: set temp directory to ~/tmp
-export TMPDIR="$HOME/tmp"
-mkdir -p "$HOME/tmp"
+# Add to PATH
+export PATH="$USER_VAST/.local/bin:$PATH"
+# Set temp directory to ~/tmp
+export TMPDIR="$USER_VAST/tmp"
+mkdir -p "$USER_VAST/tmp"
 
 source "$DOT_DIR/config/zshrc.sh"
 EOF
