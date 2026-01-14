@@ -47,11 +47,10 @@ fi
 
 # zshrc setup - set cluster env vars before sourcing main config
 cat > $HOME/.zshrc << EOF
-# Cluster-specific: use oh-my-zsh from VAST storage
-export ZSH="$USER_VAST/.oh-my-zsh"
-
 # Cluster-specific: 
-# Sared huggingface cache
+# Use oh-my-zsh from VAST storage
+export ZSH="$USER_VAST/.oh-my-zsh"
+# Shared huggingface cache
 export HF_HOME="/workspace-vast/pretrained_ckpts"
 # Save huggingface token to user's VAST storage
 export HF_TOKEN_PATH="$USER_VAST/.cache/huggingface/token"
@@ -63,8 +62,11 @@ export XDG_DATA_HOME="$USER_VAST/.local/share"
 # Add to PATH
 export PATH="$USER_VAST/.local/bin:$PATH"
 # Set temp directory to ~/tmp
-export TMPDIR="$USER_VAST/tmp"
-mkdir -p "$USER_VAST/tmp"
+export TMPDIR="$HOME/tmp"
+mkdir -p "$HOME/tmp"
+# Set Claude Code temp directory to ~/tmp
+export CLAUDE_CODE_TMPDIR="$HOME/tmp/claude"
+mkdir -p "$HOME/tmp/claude"
 
 source "$DOT_DIR/config/zshrc.sh"
 EOF
