@@ -41,10 +41,12 @@ rm -rf "$HOME/.config/zellij"
 ln -sf "$DOT_DIR/config/zellij" "$HOME/.config/zellij"
 echo "linked ~/.config/zellij -> $DOT_DIR/config/zellij"
 
-# zshrc setup - set cluster env vars before sourcing main config
-cat > $HOME/.zshrc << EOF
-# Cluster-specific: 
-# Use oh-my-zsh from VAST storage
+# Generate unified env file for both bash and zsh
+cat > $HOME/.cluster_env.sh << EOF
+# Cluster-specific environment variables
+# Sourced by both bash and zsh
+
+# Use oh-my-zsh from VAST storage (zsh only, but harmless to set in bash)
 export ZSH="$USER_VAST/.oh-my-zsh"
 # Shared huggingface cache
 export HF_HOME="/workspace-vast/pretrained_ckpts"
@@ -62,11 +64,17 @@ export GIT_CONFIG_GLOBAL="$USER_VAST/.gitconfig"
 # Add to PATH
 export PATH="$USER_VAST/.npm-global/bin:$USER_VAST/.local/bin:\$PATH"
 # Set temp directory to ~/tmp
-export TMPDIR="$HOME/tmp"
-mkdir -p "$HOME/tmp"
+export TMPDIR="\$HOME/tmp"
 # Set Claude Code temp directory to ~/tmp
-export CLAUDE_CODE_TMPDIR="$HOME/tmp/claude"
-mkdir -p "$HOME/tmp/claude"
+export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
+EOF
+echo "created ~/.cluster_env.sh"
+
+# zshrc setup
+cat > $HOME/.zshrc << EOF
+source "\$HOME/.cluster_env.sh"
+mkdir -p "\$TMPDIR"
+mkdir -p "\$CLAUDE_CODE_TMPDIR"
 
 source "$DOT_DIR/config/zshrc.sh"
 EOF
@@ -77,6 +85,16 @@ if [ -n "${ALIASES+x}" ]; then
         echo "source \"$DOT_DIR/config/aliases_${alias}.sh\"" >> $HOME/.zshrc
     done
 fi
+
+# bashrc setup
+cat > $HOME/.bashrc << EOF
+source "\$HOME/.cluster_env.sh"
+mkdir -p "\$TMPDIR"
+mkdir -p "\$CLAUDE_CODE_TMPDIR"
+
+source "$DOT_DIR/config/aliases.sh"
+EOF
+echo "created ~/.bashrc"
 
 # Claude Code setup - symlink ~/.claude to VAST storage for persistence
 if [ -d "$USER_VAST/.claude" ]; then
