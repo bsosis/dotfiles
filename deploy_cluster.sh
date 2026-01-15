@@ -97,10 +97,9 @@ EOF
 echo "created ~/.bashrc"
 
 # Claude Code setup - symlink ~/.claude to VAST storage for persistence
-if [ -d "$USER_VAST/.claude" ]; then
-    rm -rf "$HOME/.claude"
-    ln -sf "$USER_VAST/.claude" "$HOME/.claude"
-    echo "linked ~/.claude -> $USER_VAST/.claude"
-fi
+mkdir -p "$USER_VAST/.claude"
+rm -rf "$HOME/.claude"
+ln -sf "$USER_VAST/.claude" "$HOME/.claude"
+echo "linked ~/.claude -> $USER_VAST/.claude"
 
 echo "Deploy complete. Run 'zsh' to start using the new config."

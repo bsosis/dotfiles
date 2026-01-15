@@ -41,6 +41,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 source "$HOME/.local/bin/env"
 uv python install 3.11
 
+# Configure npm global prefix for VAST storage and install Claude Code
+export NPM_CONFIG_PREFIX="$USER_VAST/.npm-global"
+mkdir -p "$NPM_CONFIG_PREFIX"
+export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+echo "Installing Claude Code..."
+npm install -g @anthropic-ai/claude-code
+echo "Claude Code installed"
+
 # Setting up oh my zsh and oh my zsh plugins
 ZSH="$USER_VAST/.oh-my-zsh"
 ZSH_CUSTOM="$ZSH/custom"
@@ -85,5 +93,12 @@ else
     chmod +x "$ZELLIJ_BIN"
     echo "Zellij installed to $ZELLIJ_BIN"
 fi
+
+# Set up Claude Code config directory on VAST
+CLAUDE_DIR="$USER_VAST/.claude"
+echo "Setting up Claude Code config at $CLAUDE_DIR..."
+mkdir -p "$CLAUDE_DIR"
+cp -r "$DOT_DIR/Claude/." "$CLAUDE_DIR/"
+echo "Claude Code config files copied to $CLAUDE_DIR"
 
 echo " --------- NOW RUN ./deploy_cluster.sh [OPTION] -------- "
