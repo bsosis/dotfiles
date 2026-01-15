@@ -26,3 +26,9 @@ In most cases you'll want to use high or low priority on general -- most of the 
 Important: you should NEVER export CUDA_VISIBLE_DEVICES yourself; slurm does this for you. Overwriting this will cause slurm to land jobs on GPUs that might be utilized causing all jobs to drain into that slot and crash.
 
 If you're running a slurm job, include my username (bsosis) in the job name (along with a description of the job) so that it can easily be identified.
+
+Slurm jobs don't automatically source `.bashrc` or `.zshrc`, so environment variables won't be set by default. At the top of every sbatch script, add:
+```bash
+source /workspace-vast/bsosis/.cluster_env.sh
+```
+This file is stored in VAST (not the local home directory) so it's accessible from any node. 

@@ -44,8 +44,8 @@ rm -rf "$HOME/.config/zellij"
 ln -sf "$DOT_DIR/config/zellij" "$HOME/.config/zellij"
 echo "linked ~/.config/zellij -> $DOT_DIR/config/zellij"
 
-# Generate unified env file for both bash and zsh
-cat > $HOME/.cluster_env.sh << EOF
+# Generate unified env file for both bash and zsh (stored in VAST for cross-node access)
+cat > $VAST_PREFIX/.cluster_env.sh << EOF
 # Cluster-specific environment variables
 # Sourced by both bash and zsh
 
@@ -73,11 +73,11 @@ export PATH="\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.local/bin:\$PATH"
 export TMPDIR="\$HOME/tmp"
 export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
 EOF
-echo "created ~/.cluster_env.sh"
+echo "created $VAST_PREFIX/.cluster_env.sh"
 
 # zshrc setup
 cat > $HOME/.zshrc << EOF
-source "\$HOME/.cluster_env.sh"
+source "$VAST_PREFIX/.cluster_env.sh"
 mkdir -p "\$TMPDIR"
 mkdir -p "\$CLAUDE_CODE_TMPDIR"
 
@@ -93,7 +93,7 @@ fi
 
 # bashrc setup
 cat > $HOME/.bashrc << EOF
-source "\$HOME/.cluster_env.sh"
+source "$VAST_PREFIX/.cluster_env.sh"
 mkdir -p "\$TMPDIR"
 mkdir -p "\$CLAUDE_CODE_TMPDIR"
 
