@@ -25,16 +25,19 @@ while (( "$#" )); do
 done
 
 DOT_DIR="$(dirname "$(realpath "$0")")"
-USER_VAST="/workspace-vast/$(whoami)"
+VAST_PREFIX="/workspace-vast/$(whoami)"
 
 # Create directories on VAST per cluster setup instructions
 echo "Creating directories on VAST..."
-mkdir -p "$USER_VAST/git" "$USER_VAST/exp" "$USER_VAST/envs"
+mkdir -p "$VAST_PREFIX/git" "$VAST_PREFIX/exp" "$VAST_PREFIX/envs"
+
+# Create XDG base directories
+mkdir -p "$VAST_PREFIX/.local/share" "$VAST_PREFIX/.config" "$VAST_PREFIX/.cache" "$VAST_PREFIX/.local/state"
 
 # Set up uv directories on VAST
-export UV_PYTHON_INSTALL_DIR="$USER_VAST/.uv/python"
-export UV_CACHE_DIR="$USER_VAST/.cache/uv"
-mkdir -p "$UV_PYTHON_INSTALL_DIR" "$UV_CACHE_DIR"
+export UV_PYTHON_INSTALL_DIR="$VAST_PREFIX/.uv/python"
+export XDG_CACHE_HOME="$VAST_PREFIX/.cache"
+mkdir -p "$UV_PYTHON_INSTALL_DIR"
 
 # Install uv and python
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -42,7 +45,7 @@ source "$HOME/.local/bin/env"
 uv python install 3.11
 
 # Configure npm global prefix for VAST storage and install Claude Code
-export NPM_CONFIG_PREFIX="$USER_VAST/.npm-global"
+export NPM_CONFIG_PREFIX="$VAST_PREFIX/.npm-global"
 mkdir -p "$NPM_CONFIG_PREFIX"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
 echo "Installing Claude Code..."
@@ -50,7 +53,7 @@ npm install -g @anthropic-ai/claude-code
 echo "Claude Code installed"
 
 # Setting up oh my zsh and oh my zsh plugins
-ZSH="$USER_VAST/.oh-my-zsh"
+ZSH="$VAST_PREFIX/.oh-my-zsh"
 ZSH_CUSTOM="$ZSH/custom"
 if [ -d "$ZSH" ] && [ "$force" = "false" ]; then
     echo "Skipping download of oh-my-zsh and related plugins, pass --force to force redownload"
@@ -58,44 +61,44 @@ else
     echo " --------- INSTALLING DEPENDENCIES --------- "
     rm -rf "$ZSH"
 
-    export ZSH="$USER_VAST/.oh-my-zsh"
+    export ZSH="$VAST_PREFIX/.oh-my-zsh"
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
     git clone https://github.com/romkatv/powerlevel10k.git \
-        ${ZSH_CUSTOM:-$USER_VAST/.oh-my-zsh/custom}/themes/powerlevel10k
+        ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/themes/powerlevel10k
 
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
-        ${ZSH_CUSTOM:-$USER_VAST/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+        ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
     git clone https://github.com/zsh-users/zsh-autosuggestions \
-        ${ZSH_CUSTOM:-$USER_VAST/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+        ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
     git clone https://github.com/zsh-users/zsh-completions \
-        ${ZSH_CUSTOM:=$USER_VAST/.oh-my-zsh/custom}/plugins/zsh-completions
+        ${ZSH_CUSTOM:=$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-completions
 
     git clone https://github.com/zsh-users/zsh-history-substring-search \
-        ${ZSH_CUSTOM:-$USER_VAST/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+        ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
 
-    git clone https://github.com/jimeh/tmux-themepack.git "$USER_VAST/.tmux-themepack"
+    git clone https://github.com/jimeh/tmux-themepack.git "$VAST_PREFIX/.tmux-themepack"
 
     echo " --------- INSTALLED SUCCESSFULLY --------- "
 fi
 
 # Install Zellij to VAST storage
-ZELLIJ_BIN="$USER_VAST/.local/bin/zellij"
+ZELLIJ_BIN="$VAST_PREFIX/.local/bin/zellij"
 if [ -f "$ZELLIJ_BIN" ] && [ "$force" = "false" ]; then
     echo "Skipping Zellij install, pass --force to force reinstall"
 else
     echo "Installing Zellij to VAST storage..."
-    mkdir -p "$USER_VAST/.local/bin"
+    mkdir -p "$VAST_PREFIX/.local/bin"
     # Download and extract zellij binary
-    curl -fsSL https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar -xz -C "$USER_VAST/.local/bin"
+    curl -fsSL https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar -xz -C "$VAST_PREFIX/.local/bin"
     chmod +x "$ZELLIJ_BIN"
     echo "Zellij installed to $ZELLIJ_BIN"
 fi
 
 # Set up Claude Code config directory on VAST
-CLAUDE_DIR="$USER_VAST/.claude"
+CLAUDE_DIR="$VAST_PREFIX/.claude"
 echo "Setting up Claude Code config at $CLAUDE_DIR..."
 mkdir -p "$CLAUDE_DIR"
 cp -r "$DOT_DIR/Claude/." "$CLAUDE_DIR/"

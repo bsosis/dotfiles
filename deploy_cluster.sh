@@ -13,7 +13,7 @@ END
 )
 
 export DOT_DIR="$(dirname "$(realpath "$0")")"
-USER_VAST="/workspace-vast/$(whoami)"
+VAST_PREFIX="/workspace-vast/$(whoami)"
 
 ALIASES=()
 while (( "$#" )); do
@@ -46,26 +46,28 @@ cat > $HOME/.cluster_env.sh << EOF
 # Cluster-specific environment variables
 # Sourced by both bash and zsh
 
-# Use oh-my-zsh from VAST storage (zsh only, but harmless to set in bash)
-export ZSH="$USER_VAST/.oh-my-zsh"
-# Shared huggingface cache
+# Base prefix for all persistent storage
+export VAST_PREFIX="$VAST_PREFIX"
+
+# XDG Base Directory Specification - many tools respect these automatically
+export XDG_DATA_HOME="\$VAST_PREFIX/.local/share"
+export XDG_CONFIG_HOME="\$VAST_PREFIX/.config"
+export XDG_CACHE_HOME="\$VAST_PREFIX/.cache"
+export XDG_STATE_HOME="\$VAST_PREFIX/.local/state"
+
+# Tool-specific overrides for tools that don't respect XDG
+export ZSH="\$VAST_PREFIX/.oh-my-zsh"
 export HF_HOME="/workspace-vast/pretrained_ckpts"
-# Save huggingface token to user's VAST storage
-export HF_TOKEN_PATH="$USER_VAST/.cache/huggingface/token"
-# uv configuration for cross-node compatibility
-export UV_PYTHON_INSTALL_DIR="$USER_VAST/.uv/python"
-export UV_CACHE_DIR="$USER_VAST/.cache/uv"
-# Configure XDG_DATA_HOME to use VAST storage (used for uv tools, etc.)
-export XDG_DATA_HOME="$USER_VAST/.local/share"
-# Set npm global prefix to VAST storage (for claude-code auto-updates)
-export NPM_CONFIG_PREFIX="$USER_VAST/.npm-global"
-# Use git config from VAST storage for persistence
-export GIT_CONFIG_GLOBAL="$USER_VAST/.gitconfig"
+export HF_TOKEN_PATH="\$VAST_PREFIX/.cache/huggingface/token"
+export UV_PYTHON_INSTALL_DIR="\$VAST_PREFIX/.uv/python"
+export NPM_CONFIG_PREFIX="\$VAST_PREFIX/.npm-global"
+export GIT_CONFIG_GLOBAL="\$VAST_PREFIX/.gitconfig"
+
 # Add to PATH
-export PATH="$USER_VAST/.npm-global/bin:$USER_VAST/.local/bin:\$PATH"
-# Set temp directory to ~/tmp
+export PATH="\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.local/bin:\$PATH"
+
+# Temp directories
 export TMPDIR="\$HOME/tmp"
-# Set Claude Code temp directory to ~/tmp
 export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
 EOF
 echo "created ~/.cluster_env.sh"
@@ -97,9 +99,9 @@ EOF
 echo "created ~/.bashrc"
 
 # Claude Code setup - symlink ~/.claude to VAST storage for persistence
-mkdir -p "$USER_VAST/.claude"
+mkdir -p "$VAST_PREFIX/.claude"
 rm -rf "$HOME/.claude"
-ln -sf "$USER_VAST/.claude" "$HOME/.claude"
-echo "linked ~/.claude -> $USER_VAST/.claude"
+ln -sf "$VAST_PREFIX/.claude" "$HOME/.claude"
+echo "linked ~/.claude -> $VAST_PREFIX/.claude"
 
 echo "Deploy complete. Run 'zsh' to start using the new config."
