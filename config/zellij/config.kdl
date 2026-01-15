@@ -1,0 +1,22 @@
+// Zellij configuration
+// See https://zellij.dev/documentation/ for options
+
+// Use default keybindings - customize as needed
+// keybinds {
+//     // Add custom keybindings here
+// }
+
+// Default to zsh
+default_shell "zsh"
+
+// Mouse support
+mouse_mode true
+
+// Scrollback buffer
+scroll_buffer_size 50000
+
+// Copy to clipboard
+copy_on_select true
+
+// Theme (use default, can customize later)
+// theme "default"

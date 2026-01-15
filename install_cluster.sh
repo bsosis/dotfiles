@@ -71,6 +71,19 @@ else
     git clone https://github.com/jimeh/tmux-themepack.git "$USER_VAST/.tmux-themepack"
 
     echo " --------- INSTALLED SUCCESSFULLY --------- "
-    echo " --------- NOW RUN ./deploy_cluster.sh [OPTION] -------- "
 fi
 
+# Install Zellij to VAST storage
+ZELLIJ_BIN="$USER_VAST/.local/bin/zellij"
+if [ -f "$ZELLIJ_BIN" ] && [ "$force" = "false" ]; then
+    echo "Skipping Zellij install, pass --force to force reinstall"
+else
+    echo "Installing Zellij to VAST storage..."
+    mkdir -p "$USER_VAST/.local/bin"
+    # Download and extract zellij binary
+    curl -fsSL https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar -xz -C "$USER_VAST/.local/bin"
+    chmod +x "$ZELLIJ_BIN"
+    echo "Zellij installed to $ZELLIJ_BIN"
+fi
+
+echo " --------- NOW RUN ./deploy_cluster.sh [OPTION] -------- "

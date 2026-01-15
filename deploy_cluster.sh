@@ -4,8 +4,8 @@ USAGE=$(cat <<-END
     Usage: ./deploy_cluster.sh [OPTIONS] [--aliases <alias1,alias2,...>]
     eg. ./deploy_cluster.sh --aliases=custom
 
-    Creates ~/.zshrc and ~/.tmux.conf configured for RunPod cluster
-    with persistent storage in /workspace-vast
+    Creates ~/.zshrc, ~/.tmux.conf, and ~/.config/zellij configured
+    for RunPod cluster with persistent storage in /workspace-vast
 
     OPTIONS:
         --aliases               specify additional alias scripts to source in .zshrc, separated by commas
@@ -34,6 +34,12 @@ echo "using extra aliases: ${ALIASES[@]}"
 
 # Tmux setup
 echo "source \"$DOT_DIR/config/tmux.conf\"" > $HOME/.tmux.conf
+
+# Zellij setup - symlink config directory
+mkdir -p "$HOME/.config"
+rm -rf "$HOME/.config/zellij"
+ln -sf "$DOT_DIR/config/zellij" "$HOME/.config/zellij"
+echo "linked ~/.config/zellij -> $DOT_DIR/config/zellij"
 
 # zshrc setup - set cluster env vars before sourcing main config
 cat > $HOME/.zshrc << EOF
