@@ -29,8 +29,11 @@ while (( "$#" )); do
     esac
 done
 
+# Validate we're on the cluster
+[[ -d "/workspace-vast" ]] || { echo "Error: /workspace-vast not found - are you on the cluster?"; exit 1; }
+
 echo "deploying on cluster..."
-echo "using extra aliases: ${ALIASES[@]}"
+echo "using extra aliases: ${ALIASES[*]:-none}"
 
 # Tmux setup
 echo "source \"$DOT_DIR/config/tmux.conf\"" > $HOME/.tmux.conf

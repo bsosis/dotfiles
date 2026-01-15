@@ -25,6 +25,13 @@ while (( "$#" )); do
 done
 
 DOT_DIR="$(dirname "$(realpath "$0")")"
+
+# Validate we're on the cluster and have required dependencies
+[[ -d "/workspace-vast" ]] || { echo "Error: /workspace-vast not found - are you on the cluster?"; exit 1; }
+for cmd in curl git npm; do
+    command -v "$cmd" >/dev/null || { echo "Error: $cmd not found"; exit 1; }
+done
+
 VAST_PREFIX="/workspace-vast/$(whoami)"
 
 # Create directories on VAST per cluster setup instructions
@@ -74,12 +81,12 @@ else
         ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
     git clone https://github.com/zsh-users/zsh-completions \
-        ${ZSH_CUSTOM:=$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-completions
+        ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-completions
 
     git clone https://github.com/zsh-users/zsh-history-substring-search \
         ${ZSH_CUSTOM:-$VAST_PREFIX/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
 
-    git clone https://github.com/jimeh/tmux-themepack.git "$VAST_PREFIX/.tmux-themepack"
+    git clone https://github.com/jimeh/tmux-themepack.git "$VAST_PREFIX/.local/share/tmux-themepack"
 
     echo " --------- INSTALLED SUCCESSFULLY --------- "
 fi
