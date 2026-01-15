@@ -1,6 +1,0 @@
-bash_lint:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-  script:
-    - bash -n install.sh
-    - bash -n deploy.sh

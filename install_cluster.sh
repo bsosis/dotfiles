@@ -6,19 +6,15 @@ USAGE=$(cat <<-END
     Installs to /workspace-vast for persistence across nodes
 
     OPTIONS:
-        --extras     install extra dependencies
         --force      force reinstall of oh-my-zsh and plugins
 END
 )
 
-extras=false
 force=false
 while (( "$#" )); do
     case "$1" in
         -h|--help)
             echo "$USAGE" && exit 1 ;;
-        --extras)
-            extras=true && shift ;;
         --force)
             force=true && shift ;;
         --) # end argument parsing
@@ -78,9 +74,3 @@ else
     echo " --------- NOW RUN ./deploy_cluster.sh [OPTION] -------- "
 fi
 
-if [ $extras == true ]; then
-    echo " --------- INSTALLING EXTRAS --------- "
-    if command -v cargo &> /dev/null; then
-        NO_ASK_OPENAI_API_KEY=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/hmirin/ask.sh/main/install.sh)"
-    fi
-fi

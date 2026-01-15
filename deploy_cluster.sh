@@ -2,13 +2,12 @@
 set -euo pipefail
 USAGE=$(cat <<-END
     Usage: ./deploy_cluster.sh [OPTIONS] [--aliases <alias1,alias2,...>]
-    eg. ./deploy_cluster.sh --vim --aliases=custom
+    eg. ./deploy_cluster.sh --aliases=custom
 
     Creates ~/.zshrc and ~/.tmux.conf configured for RunPod cluster
     with persistent storage in /workspace-vast
 
     OPTIONS:
-        --vim                   deploy very simple vimrc config
         --aliases               specify additional alias scripts to source in .zshrc, separated by commas
 END
 )
@@ -16,14 +15,11 @@ END
 export DOT_DIR="$(dirname "$(realpath "$0")")"
 USER_VAST="/workspace-vast/$(whoami)"
 
-VIM="false"
 ALIASES=()
 while (( "$#" )); do
     case "$1" in
         -h|--help)
             echo "$USAGE" && exit 1 ;;
-        --vim)
-            VIM="true" && shift ;;
         --aliases=*)
             IFS=',' read -r -a ALIASES <<< "${1#*=}" && shift ;;
         --) # end argument parsing
@@ -38,12 +34,6 @@ echo "using extra aliases: ${ALIASES[@]}"
 
 # Tmux setup
 echo "source \"$DOT_DIR/config/tmux.conf\"" > $HOME/.tmux.conf
-
-# Vimrc
-if [[ $VIM == "true" ]]; then
-    echo "deploying .vimrc"
-    echo "source \"$DOT_DIR/config/vimrc\"" > $HOME/.vimrc
-fi
 
 # zshrc setup - set cluster env vars before sourcing main config
 cat > $HOME/.zshrc << EOF
