@@ -46,18 +46,36 @@ export UV_PYTHON_INSTALL_DIR="$VAST_PREFIX/.uv/python"
 export XDG_CACHE_HOME="$VAST_PREFIX/.cache"
 mkdir -p "$UV_PYTHON_INSTALL_DIR"
 
-# Install uv and python
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# Install uv if not already installed
+if command -v uv >/dev/null 2>&1; then
+    echo "uv already installed, skipping"
+else
+    echo "Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
 source "$HOME/.local/bin/env"
-uv python install 3.11
+
+# Install python 3.11 if not already installed via uv
+if uv python list --only-installed 2>/dev/null | grep -q "3.11"; then
+    echo "Python 3.11 already installed via uv, skipping"
+else
+    echo "Installing Python 3.11..."
+    uv python install 3.11
+fi
 
 # Configure npm global prefix for VAST storage and install Claude Code
 export NPM_CONFIG_PREFIX="$VAST_PREFIX/.npm-global"
 mkdir -p "$NPM_CONFIG_PREFIX"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
-echo "Installing Claude Code..."
-npm install -g @anthropic-ai/claude-code
-echo "Claude Code installed"
+
+# Install Claude Code if not already installed
+if command -v claude >/dev/null 2>&1; then
+    echo "Claude Code already installed, skipping"
+else
+    echo "Installing Claude Code..."
+    npm install -g @anthropic-ai/claude-code
+    echo "Claude Code installed"
+fi
 
 # Setting up oh my zsh and oh my zsh plugins
 ZSH="$VAST_PREFIX/.oh-my-zsh"
