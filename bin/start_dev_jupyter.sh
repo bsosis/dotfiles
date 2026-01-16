@@ -50,7 +50,7 @@ tmux new-session -s jupyterdev -d "srun -p dev,overflow \
 # Source cluster environment variables
 source /workspace-vast/bsosis/.cluster_env.sh
 # Activate the uv venv (make sure ipykernel is installed there)
-source /workspace-vast/bsosis/envs/helpfulonly/bin/activate
+source /workspace-vast/bsosis/envs/.venv/bin/activate
 # Install the Jupyter kernel if it doesnt already exist
 jupyter kernelspec list | grep -q devpodenv || python -m ipykernel install --user --name devpodenv --display-name \"devpodenv\"
 # Start Jupyter Lab
