@@ -27,7 +27,7 @@ Important: you should NEVER export CUDA_VISIBLE_DEVICES yourself; slurm does thi
 
 If you're running a slurm job, include my username (bsosis) in the job name (along with a description of the job) so that it can easily be identified.
 
-Slurm jobs don't automatically source `.bashrc` or `.zshrc`, so environment variables won't be set by default. At the top of every sbatch script, add:
+Slurm jobs don't automatically source `.bashrc` or `.zshrc`, so environment variables won't be set by default. If these are needed, you can add the following to sbatch scripts:
 ```bash
 source /workspace-vast/bsosis/.cluster_env.sh
 ```
