@@ -31,4 +31,4 @@ Slurm jobs don't automatically source `.bashrc` or `.zshrc`, so environment vari
 ```bash
 source /workspace-vast/bsosis/.cluster_env.sh
 ```
-This file is stored in VAST (not the local home directory) so it's accessible from any node. 
+This file is stored in VAST (not the local home directory) so it's accessible from any node. Most often this isn't needed, though, and it shouldn't be used in shared repos where other people might have their environments configured differently; I'll usually tell you when I want it.
