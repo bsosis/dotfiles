@@ -9,6 +9,7 @@ USAGE=$(cat <<-END
 
     OPTIONS:
         --aliases               specify additional alias scripts to source in .zshrc, separated by commas
+        --secrets               run interactive secret key setup
 END
 )
 
@@ -16,12 +17,15 @@ export DOT_DIR="$(dirname "$(realpath "$0")")"
 VAST_PREFIX="/workspace-vast/$(whoami)"
 
 ALIASES=()
+SETUP_SECRETS=false
 while (( "$#" )); do
     case "$1" in
         -h|--help)
             echo "$USAGE" && exit 1 ;;
         --aliases=*)
             IFS=',' read -r -a ALIASES <<< "${1#*=}" && shift ;;
+        --secrets)
+            SETUP_SECRETS=true && shift ;;
         --) # end argument parsing
             shift && break ;;
         -*|--*=) # unsupported flags
@@ -72,6 +76,9 @@ export PATH="\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.local/bin:\$PATH"
 # Temp directories
 export TMPDIR="\$HOME/tmp"
 export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
+
+# Source secrets if they exist
+[[ -f "\$VAST_PREFIX/.secrets.sh" ]] && source "\$VAST_PREFIX/.secrets.sh"
 EOF
 echo "created $VAST_PREFIX/.cluster_env.sh"
 
@@ -107,4 +114,11 @@ rm -rf "$HOME/.claude"
 ln -sf "$VAST_PREFIX/.claude" "$HOME/.claude"
 echo "linked ~/.claude -> $VAST_PREFIX/.claude"
 
+# Run secrets setup if requested
+if [[ "$SETUP_SECRETS" == "true" ]]; then
+    echo ""
+    VAST_PREFIX="$VAST_PREFIX" "$DOT_DIR/setup_secrets.sh"
+fi
+
+echo ""
 echo "Deploy complete. Run 'zsh' to start using the new config."
