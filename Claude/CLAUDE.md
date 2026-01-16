@@ -2,7 +2,7 @@
 This workspace is located on a shared Runpod instant cluster. I've described the basics below; for more detailed info on how to use the cluster, see the guide in `/workspace-vast/bsosis/git/dotfiles/RUNPOD_INFRASTRUCTURE_GUIDE.md`.
 
 ## Directory Structure
-The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. My workspace contains `/workspace-vast/bsosis/envs`, containing uv virtual envs (by default use the env `helpfulonly`), `/workspace-vast/bsosis/exp`, containing experiments, and `/workspace-vast/bsosis/git`, containing code.
+The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. My workspace contains `/workspace-vast/bsosis/envs`, containing uv virtual envs (by default use the env `.venv`), `/workspace-vast/bsosis/exp`, containing experiments, and `/workspace-vast/bsosis/git`, containing code.
 
 ## Compute
 The cluster consists of 24 nodes of 8xH200.
