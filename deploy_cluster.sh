@@ -61,6 +61,8 @@ export XDG_DATA_HOME="\$VAST_PREFIX/.local/share"
 export XDG_CONFIG_HOME="\$VAST_PREFIX/.config"
 export XDG_CACHE_HOME="\$VAST_PREFIX/.cache"
 export XDG_STATE_HOME="\$VAST_PREFIX/.local/state"
+# Runtime dir must be local (not NFS) for Unix sockets - used by zellij, etc.
+export XDG_RUNTIME_DIR="/tmp/runtime-\$(id -u)"
 
 # Tool-specific overrides for tools that don't respect XDG
 export ZSH="\$VAST_PREFIX/.oh-my-zsh"
@@ -87,6 +89,7 @@ cat > $HOME/.zshrc << EOF
 source "$VAST_PREFIX/.cluster_env.sh"
 mkdir -p "\$TMPDIR"
 mkdir -p "\$CLAUDE_CODE_TMPDIR"
+[[ -d "\$XDG_RUNTIME_DIR" ]] || mkdir -m 700 "\$XDG_RUNTIME_DIR"
 
 source "$DOT_DIR/config/zshrc.sh"
 EOF
@@ -103,6 +106,7 @@ cat > $HOME/.bashrc << EOF
 source "$VAST_PREFIX/.cluster_env.sh"
 mkdir -p "\$TMPDIR"
 mkdir -p "\$CLAUDE_CODE_TMPDIR"
+[[ -d "\$XDG_RUNTIME_DIR" ]] || mkdir -m 700 "\$XDG_RUNTIME_DIR"
 
 source "$DOT_DIR/config/aliases.sh"
 EOF
