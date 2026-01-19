@@ -1,5 +1,5 @@
 # Compute Cluster
-This workspace is located on a shared Runpod instant cluster. I've described the basics below; for more detailed info on how to use the cluster, see the guide in `/workspace-vast/bsosis/git/dotfiles/RUNPOD_INFRASTRUCTURE_GUIDE.md`.
+This workspace is located on a shared Runpod instant cluster. I've described the basics below; for more detailed info on how to use the cluster, see the guide in `/workspace-vast/bsosis/git/dotfiles/RUNPOD_INFRASTRUCTURE_GUIDE.md` -- refer to this whenever I ask you how to do anything complex on the cluster.
 
 ## Directory Structure
 The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. My workspace contains `/workspace-vast/bsosis/envs`, containing uv virtual envs (by default use the env `.venv`), `/workspace-vast/bsosis/exp`, containing experiments, and `/workspace-vast/bsosis/git`, containing code.
@@ -8,7 +8,7 @@ The home directory `/home/bsosis` (my username) should not be used for persisten
 The cluster consists of 24 nodes of 8xH200.
 
 ## Environment Configuration
-I've set up dotfiles with many important environment variables; see `/workspace-vast/bsosis/git/dotfiles/deploy_cluster.sh` for configuration info if needed.
+I've set up dotfiles with many important environment variables. See `/workspace-vast/bsosis/git/dotfiles/deploy_cluster.sh` for configuration info if needed; this script writes the environment variables to `/workspace-vast/bsosis/.cluster_env.sh`, ensures it gets sourced, and sets up various important directories in `/workspace-vast/bsosis`.
 
 ## Slurm
 We use slurm to manage GPU jobs; you should NEVER run jobs outside the slurm queue. 
