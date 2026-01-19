@@ -26,8 +26,7 @@ prompt_secret() {
         fi
     fi
 
-    read -sp "  Enter value for $var_name (or leave empty to skip): " value
-    echo ""
+    read -p "  Enter value for $var_name (or leave empty to skip): " value
 
     if [[ -n "$value" ]]; then
         echo "$value"
