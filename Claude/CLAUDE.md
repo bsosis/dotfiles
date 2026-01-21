@@ -10,6 +10,9 @@ The cluster consists of 24 nodes of 8xH200.
 ## Environment Configuration
 I've set up dotfiles with many important environment variables. See `/workspace-vast/bsosis/git/dotfiles/deploy_cluster.sh` for configuration info if needed; this script writes the environment variables to `/workspace-vast/bsosis/.cluster_env.sh`, ensures it gets sourced, and sets up various important directories in `/workspace-vast/bsosis`.
 
+## Claude Code Configuration
+The directory `workspace-vast/bsosis/git/dotfiles/Claude` contains configuration for Claude Code; the `deploy_cluster.sh` script copies this to the appropriate directory. If I ask you to modify the Claude Code settings or CLAUDE.md file, you should modify the version in the `dotfiles` repo, so that I can easily deploy the changes across nodes.
+
 ## Slurm
 We use slurm to manage GPU jobs; you should NEVER run jobs outside the slurm queue. 
 
