@@ -124,6 +124,9 @@ mkdir -p "\$CLAUDE_CODE_TMPDIR"
 [[ -d "\$XDG_RUNTIME_DIR" ]] || mkdir -m 700 "\$XDG_RUNTIME_DIR"
 
 source "$DOT_DIR/config/zshrc.sh"
+
+# Auto-cd to workspace on SSH login (but not in tmux to avoid changing dir on new panes)
+[[ -n "\$SSH_CONNECTION" && -z "\$TMUX" ]] && cd "$VAST_PREFIX"
 EOF
 
 # Append additional alias scripts if specified
@@ -141,6 +144,9 @@ mkdir -p "\$CLAUDE_CODE_TMPDIR"
 [[ -d "\$XDG_RUNTIME_DIR" ]] || mkdir -m 700 "\$XDG_RUNTIME_DIR"
 
 source "$DOT_DIR/config/aliases.sh"
+
+# Auto-cd to workspace on SSH login (but not in tmux to avoid changing dir on new panes)
+[[ -n "\$SSH_CONNECTION" && -z "\$TMUX" ]] && cd "$VAST_PREFIX"
 EOF
 echo "created ~/.bashrc"
 
