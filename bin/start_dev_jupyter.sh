@@ -3,14 +3,16 @@
 GPUS=1
 CPUS=8
 MEM="32G"
+VENV="/workspace-vast/bsosis/envs/.venv"
 # Parse command-line arguments
-while getopts "g:c:m:h" opt; do
+while getopts "g:c:m:v:h" opt; do
     case $opt in
         g) GPUS="$OPTARG" ;;
         c) CPUS="$OPTARG" ;;
         m) MEM="$OPTARG" ;;
+        v) VENV="$OPTARG" ;;
         h)
-            echo "Usage: $0 [-g gpus] [-c cpus] [-m mem]"
+            echo "Usage: $0 [-g gpus] [-c cpus] [-m mem] [-v venv]"
             echo "Will start a slurm dev job, and spit out the Jupyter Server URL"
             echo "to paste into your jupyter inside VSCode."
             echo "This only works if you use VSCode SSH'ed into the runpod cluster"
@@ -20,9 +22,11 @@ while getopts "g:c:m:h" opt; do
             echo "  -g <num>     Number of GPUs (default: 1)"
             echo "  -c <num>     Number of CPUs (default: 8)"
             echo "  -m <size>    Memory allocation (default: 32G)"
+            echo "  -v <path>    Path to venv to use (default: /workspace-vast/bsosis/envs/.venv)"
             echo "  -h           Show this help message"
             echo ""
             echo "Example: $0 -g 2 -c 16 -m 64G"
+            echo "Example: $0 -v /workspace-vast/bsosis/myproject/.venv"
             exit 0
             ;;
         *)
@@ -37,7 +41,7 @@ if tmux has-session -t jupyterdev 2>/dev/null; then
     echo "Attach with: tmux attach -t jupyterdev"
     exit 1
 fi
-echo "Starting Jupyter with: ${GPUS} GPU(s), ${CPUS} CPU(s), ${MEM} memory"
+echo "Starting Jupyter with: ${GPUS} GPU(s), ${CPUS} CPU(s), ${MEM} memory, venv: ${VENV}"
 echo ""
 # Create a new tmux session and run the srun command inside it
 tmux new-session -s jupyterdev -d "srun -p dev,overflow \
@@ -49,10 +53,10 @@ tmux new-session -s jupyterdev -d "srun -p dev,overflow \
      --pty bash -c '
 # Source cluster environment variables
 source /workspace-vast/bsosis/.cluster_env.sh
-# Activate the uv venv (make sure ipykernel is installed there)
-source /workspace-vast/bsosis/envs/.venv/bin/activate
-# Install the Jupyter kernel if it doesnt already exist
-jupyter kernelspec list | grep -q devpodenv || python -m ipykernel install --user --name devpodenv --display-name \"devpodenv\"
+# Activate the venv (make sure ipykernel is installed there)
+source '"${VENV}"'/bin/activate
+# Install/update the Jupyter kernel to point to the current venv
+python -m ipykernel install --user --name devpodenv --display-name \"devpodenv\"
 # Start Jupyter Lab
 echo \"================================================\"
 echo \"Starting Jupyter Lab...\"
