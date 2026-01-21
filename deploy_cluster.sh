@@ -9,7 +9,7 @@ USAGE=$(cat <<-END
 
     OPTIONS:
         --aliases               specify additional alias scripts to source in .zshrc, separated by commas
-        --secrets               run interactive secret key setup
+        --bitwarden             run Bitwarden CLI setup for secure secret management
 END
 )
 
@@ -17,15 +17,15 @@ export DOT_DIR="$(dirname "$(realpath "$0")")"
 VAST_PREFIX="/workspace-vast/$(whoami)"
 
 ALIASES=()
-SETUP_SECRETS=false
+SETUP_BITWARDEN=false
 while (( "$#" )); do
     case "$1" in
         -h|--help)
             echo "$USAGE" && exit 1 ;;
         --aliases=*)
             IFS=',' read -r -a ALIASES <<< "${1#*=}" && shift ;;
-        --secrets)
-            SETUP_SECRETS=true && shift ;;
+        --bitwarden)
+            SETUP_BITWARDEN=true && shift ;;
         --) # end argument parsing
             shift && break ;;
         -*|--*=) # unsupported flags
@@ -72,15 +72,47 @@ export UV_PYTHON_INSTALL_DIR="\$VAST_PREFIX/.uv/python"
 export NPM_CONFIG_PREFIX="\$VAST_PREFIX/.npm-global"
 export GIT_CONFIG_GLOBAL="\$VAST_PREFIX/.gitconfig"
 
-# Add to PATH
-export PATH="\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.local/bin:\$PATH"
+# Add to PATH (includes bin for bw CLI and sbatch-secure)
+export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.local/bin:\$PATH"
 
 # Temp directories
 export TMPDIR="\$HOME/tmp"
 export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
 
-# Source secrets if they exist
-[[ -f "\$VAST_PREFIX/.secrets.sh" ]] && source "\$VAST_PREFIX/.secrets.sh"
+# Bitwarden CLI helpers for secret management
+# Usage: Run 'load_secrets' once per session, then submit jobs with 'sbatch --export=ALL'
+
+_bw_ensure_unlocked() {
+    if [[ -z "\${BW_SESSION:-}" ]]; then
+        echo "Unlocking Bitwarden vault..." >&2
+        export BW_SESSION="\$(bw unlock --raw)"
+    fi
+}
+
+load_secrets() {
+    _bw_ensure_unlocked
+
+    # Load secret names from config file
+    if [[ ! -f "\$VAST_PREFIX/.bitwarden_secrets" ]]; then
+        echo "Error: \$VAST_PREFIX/.bitwarden_secrets not found." >&2
+        echo "Run setup_bitwarden.sh to configure your secrets." >&2
+        return 1
+    fi
+
+    while IFS='=' read -r env_var bw_item || [[ -n "\$env_var" ]]; do
+        # Skip empty lines and comments
+        [[ -z "\$env_var" || "\$env_var" == \#* ]] && continue
+        export "\$env_var"="\$(bw get notes "\$bw_item")"
+    done < "\$VAST_PREFIX/.bitwarden_secrets"
+
+    echo "Secrets loaded into environment."
+}
+
+# List of secret env vars for explicit SLURM export (populated by load_secrets)
+_get_secret_vars() {
+    [[ -f "\$VAST_PREFIX/.bitwarden_secrets" ]] || return
+    grep -v '^#' "\$VAST_PREFIX/.bitwarden_secrets" | grep -v '^\$' | cut -d'=' -f1 | tr '\n' ',' | sed 's/,\$//'
+}
 EOF
 echo "created $VAST_PREFIX/.cluster_env.sh"
 
@@ -118,10 +150,10 @@ rm -rf "$HOME/.claude"
 ln -sf "$VAST_PREFIX/.claude" "$HOME/.claude"
 echo "linked ~/.claude -> $VAST_PREFIX/.claude"
 
-# Run secrets setup if requested
-if [[ "$SETUP_SECRETS" == "true" ]]; then
+# Run Bitwarden setup if requested
+if [[ "$SETUP_BITWARDEN" == "true" ]]; then
     echo ""
-    VAST_PREFIX="$VAST_PREFIX" "$DOT_DIR/setup_secrets.sh"
+    VAST_PREFIX="$VAST_PREFIX" "$DOT_DIR/setup_bitwarden.sh"
 fi
 
 echo ""

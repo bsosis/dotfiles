@@ -1,0 +1,39 @@
+#!/bin/bash
+# Wrapper around sbatch that ensures Bitwarden secrets are loaded
+# Usage: sbatch-secure [sbatch-options] script.sh
+
+set -euo pipefail
+
+VAST_PREFIX="${VAST_PREFIX:-/workspace-vast/$(whoami)}"
+
+# Check if secrets config exists
+if [[ ! -f "$VAST_PREFIX/.bitwarden_secrets" ]]; then
+    echo "Error: Bitwarden not configured. Run setup_bitwarden.sh first." >&2
+    exit 1
+fi
+
+# Get list of secret env vars from config
+SECRET_VARS=$(grep -v '^#' "$VAST_PREFIX/.bitwarden_secrets" | grep -v '^$' | cut -d'=' -f1 | tr '\n' ' ')
+
+# Check if any secrets are missing from environment
+missing_secrets=()
+for var in $SECRET_VARS; do
+    if [[ -z "${!var:-}" ]]; then
+        missing_secrets+=("$var")
+    fi
+done
+
+# If secrets are missing, prompt to load them
+if [[ ${#missing_secrets[@]} -gt 0 ]]; then
+    echo "Missing secrets: ${missing_secrets[*]}"
+    echo "Loading secrets from Bitwarden..."
+    echo ""
+
+    # Source the cluster env to get load_secrets function
+    source "$VAST_PREFIX/.cluster_env.sh"
+    load_secrets
+    echo ""
+fi
+
+# Submit with all environment variables exported
+exec sbatch --export=ALL "$@"

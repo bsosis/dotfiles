@@ -1,0 +1,182 @@
+#!/bin/bash
+set -euo pipefail
+
+# Setup script for Bitwarden CLI secret management on the cluster
+# Installs bw CLI and configures secret mappings
+
+VAST_PREFIX="${VAST_PREFIX:-/workspace-vast/$(whoami)}"
+BW_SECRETS_FILE="$VAST_PREFIX/.bitwarden_secrets"
+BW_BIN="$VAST_PREFIX/bin/bw"
+
+echo "Bitwarden CLI Setup"
+echo "==================="
+echo ""
+
+# Check/install Bitwarden CLI
+if [[ -x "$BW_BIN" ]]; then
+    echo "Bitwarden CLI already installed at $BW_BIN"
+    BW_VERSION=$("$BW_BIN" --version 2>/dev/null || echo "unknown")
+    echo "  Version: $BW_VERSION"
+else
+    echo "Installing Bitwarden CLI..."
+    mkdir -p "$VAST_PREFIX/bin"
+
+    # Get latest version
+    BW_VERSION=$(curl -s https://api.github.com/repos/bitwarden/clients/releases | \
+        grep -o '"tag_name": "cli-v[^"]*"' | head -1 | sed 's/.*cli-v\([^"]*\)".*/\1/')
+
+    if [[ -z "$BW_VERSION" ]]; then
+        echo "Error: Could not determine latest Bitwarden CLI version"
+        exit 1
+    fi
+
+    echo "  Downloading version $BW_VERSION..."
+    curl -sL "https://github.com/bitwarden/clients/releases/download/cli-v${BW_VERSION}/bw-linux-${BW_VERSION}.zip" \
+        -o /tmp/bw.zip
+
+    unzip -o /tmp/bw.zip -d "$VAST_PREFIX/bin"
+    chmod +x "$BW_BIN"
+    rm /tmp/bw.zip
+
+    echo "  Installed to $BW_BIN"
+fi
+
+echo ""
+
+# Check login status
+export PATH="$VAST_PREFIX/bin:$PATH"
+BW_STATUS=$(bw status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "unauthenticated")
+
+if [[ "$BW_STATUS" == "unauthenticated" ]]; then
+    echo "You need to log in to Bitwarden."
+    echo "Run: bw login"
+    echo ""
+    bw login
+    BW_STATUS="locked"
+fi
+
+echo ""
+echo "Bitwarden status: $BW_STATUS"
+
+# Unlock if needed for setup
+if [[ "$BW_STATUS" == "locked" ]]; then
+    echo ""
+    echo "Unlocking vault for setup..."
+    export BW_SESSION="$(bw unlock --raw)"
+fi
+
+# Sync vault
+echo "Syncing vault..."
+bw sync
+
+echo ""
+echo "=== Configure Secret Mappings ==="
+echo ""
+echo "Map environment variable names to Bitwarden item names."
+echo "Secrets should be stored as Secure Notes with the secret value in the Notes field."
+echo ""
+echo "Example Bitwarden items to create in your vault:"
+echo "  - Name: 'AnthropicKeyBatch'  Notes: sk-ant-..."
+echo "  - Name: 'AnthropicKeyLow'    Notes: sk-ant-..."
+echo "  - Name: 'OpenAIKey'          Notes: sk-..."
+echo ""
+
+# Predefined secrets to prompt for
+PREDEFINED_MAPPINGS=(
+    "ANTHROPIC_API_KEY:AnthropicKey"
+    "ANTHROPIC_API_KEY_BATCH:AnthropicKeyBatch"
+    "ANTHROPIC_API_KEY_LOW:AnthropicKeyLow"
+    "ANTHROPIC_API_KEY_HIGH:AnthropicKeyHigh"
+    "OPENAI_API_KEY:OpenAIKey"
+    "OPENROUTER_API_KEY:OpenRouterKey"
+    "HF_TOKEN:HFToken"
+)
+
+# Load existing mappings if present
+declare -A existing_mappings
+if [[ -f "$BW_SECRETS_FILE" ]]; then
+    echo "Found existing config at $BW_SECRETS_FILE"
+    while IFS='=' read -r env_var bw_item || [[ -n "$env_var" ]]; do
+        [[ -z "$env_var" || "$env_var" == \#* ]] && continue
+        existing_mappings["$env_var"]="$bw_item"
+    done < "$BW_SECRETS_FILE"
+    echo ""
+fi
+
+# Build new mappings
+new_mappings=""
+
+echo "For each variable, enter the Bitwarden item name (or leave empty to skip):"
+echo ""
+
+for mapping in "${PREDEFINED_MAPPINGS[@]}"; do
+    env_var="${mapping%%:*}"
+    default_item="${mapping##*:}"
+    current="${existing_mappings[$env_var]:-}"
+
+    if [[ -n "$current" ]]; then
+        read -p "  $env_var [current: $current]: " bw_item
+        bw_item="${bw_item:-$current}"
+    else
+        read -p "  $env_var [default: $default_item]: " bw_item
+        bw_item="${bw_item:-$default_item}"
+    fi
+
+    # Verify item exists in vault
+    if [[ -n "$bw_item" ]]; then
+        if bw get item "$bw_item" &>/dev/null; then
+            new_mappings+="$env_var=$bw_item"$'\n'
+            echo "    ✓ Found '$bw_item' in vault"
+        else
+            echo "    ✗ Item '$bw_item' not found in vault - skipping"
+            echo "      Create it with: bw create item (or via web vault)"
+        fi
+    fi
+done
+
+echo ""
+echo "Add custom mappings (enter empty env var name to finish):"
+while true; do
+    read -p "  Environment variable name: " custom_env
+    [[ -z "$custom_env" ]] && break
+
+    # Validate variable name
+    if [[ ! "$custom_env" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+        echo "    Invalid variable name. Use only letters, numbers, and underscores."
+        continue
+    fi
+
+    read -p "  Bitwarden item name for $custom_env: " custom_item
+    if [[ -n "$custom_item" ]]; then
+        if bw get item "$custom_item" &>/dev/null; then
+            new_mappings+="$custom_env=$custom_item"$'\n'
+            echo "    ✓ Found '$custom_item' in vault"
+        else
+            echo "    ✗ Item '$custom_item' not found in vault - skipping"
+        fi
+    fi
+done
+
+# Write config file
+cat > "$BW_SECRETS_FILE" << EOF
+# Bitwarden secret mappings
+# Format: ENV_VAR_NAME=bitwarden_item_name
+# Generated by setup_bitwarden.sh
+
+$new_mappings
+EOF
+
+chmod 600 "$BW_SECRETS_FILE"
+
+echo ""
+echo "Config saved to $BW_SECRETS_FILE"
+echo ""
+echo "=== Setup Complete ==="
+echo ""
+echo "Usage:"
+echo "  1. Start a new shell session (or run: source $VAST_PREFIX/.cluster_env.sh)"
+echo "  2. Run 'load_secrets' - you'll be prompted for your master password"
+echo "  3. Submit SLURM jobs with: sbatch --export=ALL your_job.sh"
+echo "     Or use the wrapper: sbatch-secure your_job.sh"
+echo ""
+echo "The 'load_secrets' command only needs to be run once per shell session."
