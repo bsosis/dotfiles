@@ -126,7 +126,9 @@ mkdir -p "\$CLAUDE_CODE_TMPDIR"
 source "$DOT_DIR/config/zshrc.sh"
 
 # Auto-cd to workspace on SSH login (but not in tmux to avoid changing dir on new panes)
-[[ -n "\$SSH_CONNECTION" && -z "\$TMUX" ]] && cd "$VAST_PREFIX"
+if [[ -n "\$SSH_CONNECTION" && -z "\$TMUX" ]]; then
+    _CHPWD_SUPPRESS_LS=1; cd "$VAST_PREFIX"; unset _CHPWD_SUPPRESS_LS
+fi
 EOF
 
 # Append additional alias scripts if specified

@@ -42,10 +42,10 @@ pastefinish() {
 zstyle :bracketed-paste-magic paste-init pasteinit
 zstyle :bracketed-paste-magic paste-finish pastefinish
 
-# ls after every cd
+# ls after every cd (can be suppressed by setting _CHPWD_SUPPRESS_LS=1)
 function chpwd() {
  emulate -L zsh
- ls
+ [[ -z "${_CHPWD_SUPPRESS_LS:-}" ]] && ls
 }
 
 
