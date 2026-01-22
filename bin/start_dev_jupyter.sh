@@ -68,7 +68,7 @@ echo "Started Jupyter in tmux session 'jupyterdev'"
 echo "Waiting for Jupyter Lab to start and retrieve URL..."
 echo ""
 # Wait for Jupyter to start and capture the URL
-max_attempts=20
+max_attempts=60
 attempt=0
 jupyter_url=""
 while [ $attempt -lt $max_attempts ]; do
