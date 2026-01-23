@@ -90,6 +90,7 @@ PREDEFINED_MAPPINGS=(
     "OPENAI_API_KEY:OpenAIKey"
     "OPENROUTER_API_KEY:OpenRouterKey"
     "HF_TOKEN:HFToken"
+    "GH_TOKEN:GitHubToken"
 )
 
 # Load existing mappings if present

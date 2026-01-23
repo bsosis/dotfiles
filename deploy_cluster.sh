@@ -177,6 +177,10 @@ rm -rf "$HOME/.claude"
 ln -sf "$VAST_PREFIX/.claude" "$HOME/.claude"
 echo "linked ~/.claude -> $VAST_PREFIX/.claude"
 
+# Git credential helper for GitHub (uses GH_TOKEN from load_secrets)
+GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global credential.helper "$DOT_DIR/bin/git-credential-bitwarden"
+echo "configured git credential helper for GitHub"
+
 # Run Bitwarden setup if requested
 if [[ "$SETUP_BITWARDEN" == "true" ]]; then
     echo ""
