@@ -85,12 +85,20 @@ export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
 _bw_ensure_unlocked() {
     if [[ -z "\${BW_SESSION:-}" ]]; then
         echo "Unlocking Bitwarden vault..." >&2
-        export BW_SESSION="\$(bw unlock --raw)"
+        local session
+        session="\$(bw unlock --raw)"
+        if [[ -z "\$session" ]]; then
+            echo "Error: Failed to unlock Bitwarden vault." >&2
+            return 1
+        fi
+        export BW_SESSION="\$session"
     fi
 }
 
 load_secrets() {
-    _bw_ensure_unlocked
+    if ! _bw_ensure_unlocked; then
+        return 1
+    fi
 
     # Load secret names from config file
     if [[ ! -f "\$VAST_PREFIX/.bitwarden_secrets" ]]; then
@@ -99,12 +107,23 @@ load_secrets() {
         return 1
     fi
 
+    local failed=0
     while IFS='=' read -r env_var bw_item || [[ -n "\$env_var" ]]; do
         # Skip empty lines and comments
         [[ -z "\$env_var" || "\$env_var" == \#* ]] && continue
-        export "\$env_var"="\$(bw get notes "\$bw_item")"
+        local value
+        if ! value="\$(bw get notes "\$bw_item" 2>/dev/null)"; then
+            echo "Warning: Failed to get '\$bw_item' for \$env_var" >&2
+            failed=1
+            continue
+        fi
+        export "\$env_var"="\$value"
     done < "\$VAST_PREFIX/.bitwarden_secrets"
 
+    if [[ \$failed -eq 1 ]]; then
+        echo "Secrets partially loaded (some failed)." >&2
+        return 1
+    fi
     echo "Secrets loaded into environment."
 }
 
