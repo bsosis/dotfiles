@@ -79,59 +79,8 @@ export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST
 export TMPDIR="\$HOME/tmp"
 export CLAUDE_CODE_TMPDIR="\$HOME/tmp/claude"
 
-# Bitwarden CLI helpers for secret management
-# Usage: Run 'load_secrets' once per session, then submit jobs with 'sbatch --export=ALL'
-
-_bw_ensure_unlocked() {
-    if [[ -z "\${BW_SESSION:-}" ]]; then
-        echo "Unlocking Bitwarden vault..." >&2
-        local session
-        session="\$(bw unlock --raw)"
-        if [[ -z "\$session" ]]; then
-            echo "Error: Failed to unlock Bitwarden vault." >&2
-            return 1
-        fi
-        export BW_SESSION="\$session"
-    fi
-}
-
-load_secrets() {
-    if ! _bw_ensure_unlocked; then
-        return 1
-    fi
-
-    # Load secret names from config file
-    if [[ ! -f "\$VAST_PREFIX/.bitwarden_secrets" ]]; then
-        echo "Error: \$VAST_PREFIX/.bitwarden_secrets not found." >&2
-        echo "Run setup_bitwarden.sh to configure your secrets." >&2
-        return 1
-    fi
-
-    local failed=0
-    while IFS='=' read -r env_var bw_item || [[ -n "\$env_var" ]]; do
-        # Skip empty lines and comments
-        [[ -z "\$env_var" || "\$env_var" == \#* ]] && continue
-        local value
-        if ! value="\$(bw get notes "\$bw_item" 2>/dev/null)"; then
-            echo "Warning: Failed to get '\$bw_item' for \$env_var" >&2
-            failed=1
-            continue
-        fi
-        export "\$env_var"="\$value"
-    done < "\$VAST_PREFIX/.bitwarden_secrets"
-
-    if [[ \$failed -eq 1 ]]; then
-        echo "Secrets partially loaded (some failed)." >&2
-        return 1
-    fi
-    echo "Secrets loaded into environment."
-}
-
-# List of secret env vars for explicit SLURM export (populated by load_secrets)
-_get_secret_vars() {
-    [[ -f "\$VAST_PREFIX/.bitwarden_secrets" ]] || return
-    grep -v '^#' "\$VAST_PREFIX/.bitwarden_secrets" | grep -v '^\$' | cut -d'=' -f1 | tr '\n' ',' | sed 's/,\$//'
-}
+# Bitwarden CLI helpers (load_secrets, etc.)
+source "$DOT_DIR/config/bitwarden.sh"
 EOF
 echo "created $VAST_PREFIX/.cluster_env.sh"
 

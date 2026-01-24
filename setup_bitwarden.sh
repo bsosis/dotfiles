@@ -89,6 +89,7 @@ PREDEFINED_MAPPINGS=(
     "ANTHROPIC_API_KEY_HIGH:AnthropicKeyHigh"
     "OPENAI_API_KEY:OpenAIKey"
     "OPENROUTER_API_KEY:OpenRouterKey"
+    "TOGETHER_API_KEY:TogetherKey"
     "HF_TOKEN:HFToken"
     "GH_TOKEN:GitHubToken"
 )
