@@ -28,8 +28,6 @@ In most cases you'll want to use high or low priority on general -- most of the 
 
 Important: you should NEVER export CUDA_VISIBLE_DEVICES yourself; slurm does this for you. Overwriting this will cause slurm to land jobs on GPUs that might be utilized causing all jobs to drain into that slot and crash.
 
-If you're running a slurm job, include my username (bsosis) in the job name (along with a description of the job) so that it can easily be identified.
-
 ## Secrets Management
 API keys are managed via Bitwarden CLI. Run `load_secrets` once per shell session (prompts for master password), then secrets are available as environment variables. For SLURM jobs, use `sbatch --export=ALL` or the `sbatch-secure` wrapper which auto-prompts if secrets aren't loaded.
 
