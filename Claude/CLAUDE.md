@@ -2,13 +2,18 @@
 This workspace is located on a shared Runpod instant cluster. I've described the basics below; for more detailed info on how to use the cluster, see the guide in `/workspace-vast/bsosis/git/dotfiles/RUNPOD_INFRASTRUCTURE_GUIDE.md` -- refer to this whenever I ask you how to do anything complex on the cluster.
 
 ## Directory Structure
-The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. My workspace contains `/workspace-vast/bsosis/envs`, containing uv virtual envs (by default use the env `.venv`), `/workspace-vast/bsosis/exp`, containing experiments, and `/workspace-vast/bsosis/git`, containing code.
+The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. Code is contained in `/workspace-vast/bsosis/git`; `/workspace-vast/bsosis/logs` contains most (though not all) logs. 
+
+Generally, you should confine file searches to the project directory (e.g. `/workspace-vast/bsosis/git/dotfiles`) or to the logs directory. Searching through `/workspace-vast/bsosis` will turn up a lot of false positives from other projects or worktrees, and `/home/bsosis` will generally contain only temporary files.
 
 ## Compute
 The cluster consists of 24 nodes of 8xH200.
 
 ## Environment Configuration
 I've set up dotfiles with many important environment variables. See `/workspace-vast/bsosis/git/dotfiles/deploy_cluster.sh` for configuration info if needed; this script writes the environment variables to `/workspace-vast/bsosis/.cluster_env.sh`, ensures it gets sourced, and sets up various important directories in `/workspace-vast/bsosis`.
+
+## Virtual Environments
+Generally, repo directories will each contain a `.venv` directory; you should use this directory with `uv` when running Python code.
 
 ## Claude Code Configuration
 The directory `workspace-vast/bsosis/git/dotfiles/Claude` contains configuration for Claude Code; the `deploy_cluster.sh` script copies this to the appropriate directory. If I ask you to modify the Claude Code settings or CLAUDE.md file, you should modify the version in the `dotfiles` repo, so that I can easily deploy the changes across nodes.
@@ -33,3 +38,6 @@ API keys are managed via Bitwarden CLI. Run `load_secrets` once per shell sessio
 
 ## VLLM and accelerate
 Sometimes VLLM and accelerate don't clean up properly (especially if the slurm job is preempted or hits a time limit), which can cause issues on the cluster. When using either, you should capture the PID and make sure it gets killed properly on exit. (Note, make sure you don't kill any other user's processes!)
+
+## Username
+Don't hard-code my username in anything you write: this is a shared project, and needs to work for my collaborators as well. Use relative paths, placeholders (`$USER` or `%u`), generic job names, etc. instead.
