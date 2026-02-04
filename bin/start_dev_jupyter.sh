@@ -35,6 +35,25 @@ while getopts "g:c:m:v:h" opt; do
             ;;
     esac
 done
+
+# Validate venv path
+if [ ! -d "$VENV" ]; then
+    echo "Venv not found at: $VENV"
+
+    # Check if pyproject.toml exists in the parent directory of the venv
+    VENV_PARENT="$(dirname "$VENV")"
+    if [ -f "$VENV_PARENT/pyproject.toml" ]; then
+        echo "Found pyproject.toml in $VENV_PARENT - creating venv with uv..."
+        uv venv "$VENV" --project "$VENV_PARENT"
+        uv sync --project "$VENV_PARENT"
+        echo "Created venv at: $VENV"
+    else
+        echo "Error: No pyproject.toml found in $VENV_PARENT"
+        echo "Either specify a valid venv path with -v, or ensure pyproject.toml exists in the venv's parent directory."
+        exit 1
+    fi
+fi
+
 # Check if tmux session already exists
 if tmux has-session -t jupyterdev 2>/dev/null; then
     echo "tmux session 'jupyterdev' already exists!"
