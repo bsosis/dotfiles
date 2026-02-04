@@ -4,7 +4,7 @@ This workspace is located on a shared Runpod instant cluster. I've described the
 ## Directory Structure
 The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. Code is contained in `/workspace-vast/bsosis/git`; `/workspace-vast/bsosis/logs` contains most (though not all) logs. 
 
-Generally, you should confine file searches to the project directory (e.g. `/workspace-vast/bsosis/git/dotfiles`) or to the logs directory. Searching through `/workspace-vast/bsosis` will turn up a lot of false positives from other projects or worktrees, and `/home/bsosis` will generally contain only temporary files.
+Generally, you should confine file searches/`find` commands to the project directory (or to the logs directory, if relevant). I'll almost always run you in the directory for a particular repo, and everything you need should be in that directory. Searching through `/workspace-vast/bsosis` or `/workspace-vast/bsosis/git` will turn up a lot of false positives from other projects or worktrees, and `/home/bsosis` will generally contain only temporary files. 
 
 ## Compute
 The cluster consists of 24 nodes of 8xH200.
@@ -13,7 +13,7 @@ The cluster consists of 24 nodes of 8xH200.
 I've set up dotfiles with many important environment variables. See `/workspace-vast/bsosis/git/dotfiles/deploy_cluster.sh` for configuration info if needed; this script writes the environment variables to `/workspace-vast/bsosis/.cluster_env.sh`, ensures it gets sourced, and sets up various important directories in `/workspace-vast/bsosis`.
 
 ## Virtual Environments
-Generally, repo directories will each contain a `.venv` directory; you should use this directory with `uv` when running Python code.
+Generally, repo directories will each contain a `.venv` directory; you should use this directory with `uv` when running Python code. Running commands without uv will generally fail as the global environment does not have any of the required packages installed.
 
 ## Claude Code Configuration
 The directory `workspace-vast/bsosis/git/dotfiles/Claude` contains configuration for Claude Code; the `deploy_cluster.sh` script copies this to the appropriate directory. If I ask you to modify the Claude Code settings or CLAUDE.md file, you should modify the version in the `dotfiles` repo, so that I can easily deploy the changes across nodes.
