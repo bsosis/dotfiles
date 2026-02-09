@@ -53,7 +53,7 @@ else
     echo "Installing uv..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
-source "$HOME/.local/bin/env"
+[[ -f "$HOME/.local/bin/env" ]] && source "$HOME/.local/bin/env"
 
 # Install python 3.11 if not already installed via uv
 if uv python list --only-installed 2>/dev/null | grep -q "3.11"; then

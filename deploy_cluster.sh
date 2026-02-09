@@ -10,8 +10,8 @@ USAGE=$(cat <<-END
     OPTIONS:
         --aliases               specify additional alias scripts to source in .zshrc, separated by commas
         --bitwarden             run Bitwarden CLI setup for secure secret management
-        --git-name              set git user.name (skipped if already configured)
-        --git-email             set git user.email (skipped if already configured)
+        --git-name NAME         set git user.name (skipped if already configured)
+        --git-email EMAIL       set git user.email (skipped if already configured)
 END
 )
 
@@ -30,10 +30,10 @@ while (( "$#" )); do
             IFS=',' read -r -a ALIASES <<< "${1#*=}" && shift ;;
         --bitwarden)
             SETUP_BITWARDEN=true && shift ;;
-        --git-name=*)
-            GIT_NAME="${1#*=}" && shift ;;
-        --git-email=*)
-            GIT_EMAIL="${1#*=}" && shift ;;
+        --git-name)
+            GIT_NAME="$2" && shift 2 ;;
+        --git-email)
+            GIT_EMAIL="$2" && shift 2 ;;
         --) # end argument parsing
             shift && break ;;
         -*|--*=) # unsupported flags
