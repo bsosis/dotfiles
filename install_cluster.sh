@@ -28,7 +28,7 @@ DOT_DIR="$(dirname "$(realpath "$0")")"
 
 # Validate we're on the cluster and have required dependencies
 [[ -d "/workspace-vast" ]] || { echo "Error: /workspace-vast not found - are you on the cluster?"; exit 1; }
-for cmd in curl git npm; do
+for cmd in curl git; do
     command -v "$cmd" >/dev/null || { echo "Error: $cmd not found"; exit 1; }
 done
 
@@ -63,6 +63,19 @@ else
     uv python install 3.11
 fi
 
+# Install Node.js/npm if not available
+NODE_DIR="$VAST_PREFIX/.node"
+if command -v npm >/dev/null 2>&1; then
+    echo "npm already installed, skipping"
+else
+    echo "Installing Node.js..."
+    mkdir -p "$NODE_DIR"
+    NODE_VERSION="v22.13.1"
+    curl -fsSL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" | tar -xJ -C "$NODE_DIR" --strip-components=1
+    echo "Node.js installed to $NODE_DIR"
+fi
+export PATH="$NODE_DIR/bin:$PATH"
+
 # Configure npm global prefix for VAST storage and install Claude Code
 export NPM_CONFIG_PREFIX="$VAST_PREFIX/.npm-global"
 mkdir -p "$NPM_CONFIG_PREFIX"
@@ -73,7 +86,8 @@ if command -v claude >/dev/null 2>&1; then
     echo "Claude Code already installed, skipping"
 else
     echo "Installing Claude Code..."
-    npm install -g @anthropic-ai/claude-code
+    # npm install -g @anthropic-ai/claude-code
+    curl -fsSL https://claude.ai/install.sh | bash
     echo "Claude Code installed"
 fi
 

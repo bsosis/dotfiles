@@ -10,6 +10,8 @@ USAGE=$(cat <<-END
     OPTIONS:
         --aliases               specify additional alias scripts to source in .zshrc, separated by commas
         --bitwarden             run Bitwarden CLI setup for secure secret management
+        --git-name              set git user.name (skipped if already configured)
+        --git-email             set git user.email (skipped if already configured)
 END
 )
 
@@ -18,6 +20,8 @@ VAST_PREFIX="/workspace-vast/$(whoami)"
 
 ALIASES=()
 SETUP_BITWARDEN=false
+GIT_NAME=""
+GIT_EMAIL=""
 while (( "$#" )); do
     case "$1" in
         -h|--help)
@@ -26,6 +30,10 @@ while (( "$#" )); do
             IFS=',' read -r -a ALIASES <<< "${1#*=}" && shift ;;
         --bitwarden)
             SETUP_BITWARDEN=true && shift ;;
+        --git-name=*)
+            GIT_NAME="${1#*=}" && shift ;;
+        --git-email=*)
+            GIT_EMAIL="${1#*=}" && shift ;;
         --) # end argument parsing
             shift && break ;;
         -*|--*=) # unsupported flags
@@ -73,7 +81,7 @@ export NPM_CONFIG_PREFIX="\$VAST_PREFIX/.npm-global"
 export GIT_CONFIG_GLOBAL="\$VAST_PREFIX/.gitconfig"
 
 # Add to PATH (includes bin for bw CLI and sbatch-secure)
-export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.local/bin:\$PATH"
+export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.node/bin:\$VAST_PREFIX/.local/bin:\$PATH"
 
 # Temp directories
 export TMPDIR="\$HOME/tmp"
@@ -129,6 +137,26 @@ echo "linked ~/.claude -> $VAST_PREFIX/.claude"
 # Git credential helper for GitHub (uses GH_TOKEN from load_secrets)
 GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global credential.helper "$DOT_DIR/bin/git-credential-bitwarden"
 echo "configured git credential helper for GitHub"
+
+# Git user.name (skip if already set)
+if [[ -n "$GIT_NAME" ]]; then
+    if GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global --get user.name >/dev/null 2>&1; then
+        echo "git user.name already configured, skipping"
+    else
+        GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global user.name "$GIT_NAME"
+        echo "configured git user.name"
+    fi
+fi
+
+# Git user.email (skip if already set)
+if [[ -n "$GIT_EMAIL" ]]; then
+    if GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global --get user.email >/dev/null 2>&1; then
+        echo "git user.email already configured, skipping"
+    else
+        GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global user.email "$GIT_EMAIL"
+        echo "configured git user.email"
+    fi
+fi
 
 # Run Bitwarden setup if requested
 if [[ "$SETUP_BITWARDEN" == "true" ]]; then
