@@ -56,7 +56,12 @@ Some conventions I prefer:
     - Do not use headers or section breaks: I'm typically going to paste the summaries into already-existing files with their own headers, so I don't want any extra headers in the outputs that I have to reformat or remove.
     - Instead, you should generally put information in bullet points
     - Keep everything concise; do not include any extraneous descriptions; minimize filler whitespace
-- When using LLM judges or similar, default to using Anthropic's API. Use `claude-sonnet-4-5` or `claude-opus-4-5`, as these should refer to the latest models.
+- We generally want code to "fail fast": if there's a problem of any sort, we want to hit it as early as possible *and halt* so we can fix it
+    - This means, among other things, that excessive try-except blocks are undesirable: we generally want stop the experiment if it's in a suboptimal state
+    - Similarly, you should generally default to throwing errors in response to issues, rather than just printing warnings (and certainly not silently ignoring the issue!)
+- When using LLM judges or similar, default to using Anthropic's API. Use `claude-sonnet-4-5` or `claude-opus-4-6`, as these should refer to the latest models.
+- When using any API, you should add a check to verify that the appropriate API key is available, and throw an error if not
+    - Try to put this as early in the code as possible: we want the code to fail quickly if there's a problem so we can fix it and rerun.
 
 ## Reasoning Mode
 There are a couple considerations to keep in mind when running models with reasoning.
@@ -64,3 +69,5 @@ There are a couple considerations to keep in mind when running models with reaso
 - If VLLM is run with a reasoning parser (e.g. `--reasoning-parser qwen3`), it extracts the reasoning into separate reasoning and reasoning_content fields instead of keeping `<think>` tags in the main content.
 - By default, if you write a script that starts a VLLM server, you should check if the model is a Qwen 3 model and include the reasoning parser if so.
 - Scripts that interact with existing VLLM servers (e.g. python scripts that use a given host/port, etc.) should accommodate both separate reasoning content and reasoning that's included in the main content.
+- Make sure you give models enough tokens for reasoning when setting max_tokens or similar arguments. We're using relatively small models on large GPUs, so it's totally fine to give models 16384 tokens or even more just to make sure they don't run out mid-problem.
+- Relatedly, a common VLLM issue is setting max_tokens equal to max_model_len, not taking into account the tokens needed for the prompt

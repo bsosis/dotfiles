@@ -41,6 +41,13 @@ mkdir -p "$VAST_PREFIX/git" "$VAST_PREFIX/exp" "$VAST_PREFIX/envs"
 # Create XDG base directories
 mkdir -p "$VAST_PREFIX/.local/share" "$VAST_PREFIX/.config" "$VAST_PREFIX/.cache" "$VAST_PREFIX/.local/state"
 
+# Symlink ~/.local/bin to VAST so tool installers (uv, claude, etc.) persist across nodes
+mkdir -p "$VAST_PREFIX/.local/bin" "$HOME/.local"
+if [ ! -L "$HOME/.local/bin" ]; then
+    [ -d "$HOME/.local/bin" ] && cp -a "$HOME/.local/bin/." "$VAST_PREFIX/.local/bin/" && rm -rf "$HOME/.local/bin"
+    ln -sf "$VAST_PREFIX/.local/bin" "$HOME/.local/bin"
+fi
+
 # Set up uv directories on VAST
 export UV_PYTHON_INSTALL_DIR="$VAST_PREFIX/.uv/python"
 export XDG_CACHE_HOME="$VAST_PREFIX/.cache"
@@ -81,12 +88,11 @@ export NPM_CONFIG_PREFIX="$VAST_PREFIX/.npm-global"
 mkdir -p "$NPM_CONFIG_PREFIX"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
 
-# Install Claude Code if not already installed
-if command -v claude >/dev/null 2>&1; then
+# Install Claude Code (native installer) if not in ~/.local/bin
+if [ -x "$HOME/.local/bin/claude" ]; then
     echo "Claude Code already installed, skipping"
 else
     echo "Installing Claude Code..."
-    # npm install -g @anthropic-ai/claude-code
     curl -fsSL https://claude.ai/install.sh | bash
     echo "Claude Code installed"
 fi

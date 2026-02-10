@@ -81,7 +81,7 @@ export NPM_CONFIG_PREFIX="\$VAST_PREFIX/.npm-global"
 export GIT_CONFIG_GLOBAL="\$VAST_PREFIX/.gitconfig"
 
 # Add to PATH (includes bin for bw CLI and sbatch-secure)
-export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.node/bin:\$VAST_PREFIX/.local/bin:\$PATH"
+export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.node/bin:\$HOME/.local/bin:\$PATH"
 
 # Temp directories
 export TMPDIR="\$HOME/tmp"
