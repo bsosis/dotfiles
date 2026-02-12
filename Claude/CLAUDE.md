@@ -44,10 +44,11 @@ Sometimes VLLM and accelerate don't clean up properly (especially if the slurm j
 ## Username
 Don't hard-code my username in anything you write: this is a shared project, and needs to work for my collaborators as well. Use relative paths, placeholders (`$USER` or `%u`), generic job names, etc. instead.
 
-## Research Best Practices
-- Always save any LLM transcripts produced by experiments. The aggregate numbers are in general much much less informative than transcripts; every single experiment that generates language model outputs (beyond logits or individual tokens) should save the transcripts, no exceptions.
+# Research Best Practices
+## Basics
+- Always save any LLM transcripts produced by experiments. The aggregate numbers are in general much much less informative than transcripts; every single experiment that generates language model outputs (beyond logits or individual tokens) should save the transcripts. It's fine if these are in non-human-readable json or jsonl files, as long as they're stored somewhere.
 - In general, you should always err on the side of saving more data rather than less: training curves over time rather than just final results, benchmark scores by category or by individual question rather than just aggregate results, etc.
-- You should generally use temperature of 0.6 or 0.7 to evaluate language models (although there are some cases where temperature of 1 is appropriate).
+- You should generally use temperature of 0.7 to evaluate language models (although there are some cases where temperature of 1 is appropriate).
 
 ## Code Style
 Some conventions I prefer:
@@ -62,6 +63,7 @@ Some conventions I prefer:
 - When using LLM judges or similar, default to using Anthropic's API. Use `claude-sonnet-4-5` or `claude-opus-4-6`, as these should refer to the latest models.
 - When using any API, you should add a check to verify that the appropriate API key is available, and throw an error if not
     - Try to put this as early in the code as possible: we want the code to fail quickly if there's a problem so we can fix it and rerun.
+- If these style conventions conflict with those used by other files in the repo, you should default to following these guidelines rather than copying existing files, since there are quite a few older scripts in the repo that have not been kept up-to-date as the style guidelines have evolved.
 
 ## Reasoning Mode
 There are a couple considerations to keep in mind when running models with reasoning.
@@ -69,5 +71,5 @@ There are a couple considerations to keep in mind when running models with reaso
 - If VLLM is run with a reasoning parser (e.g. `--reasoning-parser qwen3`), it extracts the reasoning into separate reasoning and reasoning_content fields instead of keeping `<think>` tags in the main content.
 - By default, if you write a script that starts a VLLM server, you should check if the model is a Qwen 3 model and include the reasoning parser if so.
 - Scripts that interact with existing VLLM servers (e.g. python scripts that use a given host/port, etc.) should accommodate both separate reasoning content and reasoning that's included in the main content.
-- Make sure you give models enough tokens for reasoning when setting max_tokens or similar arguments. We're using relatively small models on large GPUs, so it's totally fine to give models 16384 tokens or even more just to make sure they don't run out mid-problem.
+- Make sure you give models enough tokens for reasoning when setting max_tokens or similar arguments. We're using relatively small models on large GPUs, so it's totally fine to give models 8192-16384 tokens or even more just to make sure they don't run out mid-problem.
 - Relatedly, a common VLLM issue is setting max_tokens equal to max_model_len, not taking into account the tokens needed for the prompt
