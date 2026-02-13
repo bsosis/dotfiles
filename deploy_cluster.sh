@@ -47,6 +47,16 @@ done
 echo "deploying on cluster..."
 echo "using extra aliases: ${ALIASES[*]:-none}"
 
+# Ensure shared group exists locally (NFS needs group in /etc/group for membership)
+if ! getent group honly > /dev/null 2>&1; then
+    sudo groupadd -g 10001 honly
+    echo "created honly group"
+fi
+if ! id -nG | grep -qw honly; then
+    sudo usermod -aG honly "$(whoami)"
+    echo "added $(whoami) to honly group"
+fi
+
 # Tmux setup
 echo "source \"$DOT_DIR/config/tmux.conf\"" > $HOME/.tmux.conf
 
@@ -82,6 +92,9 @@ export GIT_CONFIG_GLOBAL="\$VAST_PREFIX/.gitconfig"
 
 # Add to PATH (includes bin for bw CLI and sbatch-secure)
 export PATH="$DOT_DIR/bin:\$VAST_PREFIX/bin:\$VAST_PREFIX/.npm-global/bin:\$VAST_PREFIX/.node/bin:\$HOME/.local/bin:\$PATH"
+
+# Default umask: group-writable for shared directories (setgid handles group assignment)
+umask 002
 
 # Temp directories
 export TMPDIR="\$HOME/tmp"
