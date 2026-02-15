@@ -63,7 +63,7 @@ Some conventions I prefer:
 - When using LLM judges or similar, default to using Anthropic's API. Use `claude-sonnet-4-5` or `claude-opus-4-6`, as these should refer to the latest models.
 - When using any API, you should add a check to verify that the appropriate API key is available, and throw an error if not
     - Try to put this as early in the code as possible: we want the code to fail quickly if there's a problem so we can fix it and rerun.
-- If these style conventions conflict with those used by other files in the repo, you should default to following these guidelines rather than copying existing files, since there are quite a few older scripts in the repo that have not been kept up-to-date as the style guidelines have evolved.
+- If these style conventions conflict with those used by other files in the repo, you should default to following the other files in the repo, as this is a shared project and these are just my personal preferences.
 
 ## Reasoning Mode
 There are a couple considerations to keep in mind when running models with reasoning.
