@@ -147,6 +147,10 @@ rm -rf "$HOME/.claude"
 ln -sf "$VAST_PREFIX/.claude" "$HOME/.claude"
 echo "linked ~/.claude -> $VAST_PREFIX/.claude"
 
+# Sync Claude Code config files (CLAUDE.md, settings, skills, etc.)
+cp -r "$DOT_DIR/Claude/." "$VAST_PREFIX/.claude/"
+echo "synced Claude Code config from dotfiles"
+
 # Git credential helper for GitHub (uses GH_TOKEN from load_secrets)
 GIT_CONFIG_GLOBAL="$VAST_PREFIX/.gitconfig" git config --global credential.helper "$DOT_DIR/bin/git-credential-bitwarden"
 echo "configured git credential helper for GitHub"
