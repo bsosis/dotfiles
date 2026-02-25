@@ -49,18 +49,43 @@ Populate with whatever parameters are relevant to the experiment based on user d
 Do NOT include boilerplate fields that aren't relevant. Keep it minimal.
 
 ### `1_submit_all.sh`
+
+**If the experiment involves running evals**, this should be a thin wrapper that calls the generic `experiments/submit_evals.sh` script:
+
 ```bash
 #!/bin/bash
-# Submit all jobs for this experiment
-# Reproduces: experiments/YYMMDD_<name>/
+# Submit eval jobs for this experiment.
+# Usage: bash 1_submit_all.sh [--honly|--no-honly|--all] [-n N]
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-echo "Experiment: $SCRIPT_DIR"
-echo "Date: $(date -Iseconds)"
-
-# Submit jobs — fill in
+exec "$SCRIPT_DIR/../submit_evals.sh" "$SCRIPT_DIR" "$@"
 ```
+
+For this to work, `config.yaml` must include `evals` and `models` fields in the format expected by `submit_evals.sh`:
+
+```yaml
+evals: tax_fraud,ice_eval  # comma-separated eval names from EVAL_REGISTRY
+
+models:
+  - name: Qwen/Qwen3-32B        # model path or API name
+    type: vllm                   # vllm or api
+    label: qwen32b               # short label for output dirs
+  - name: claude-sonnet-4-5
+    type: api
+    label: sonnet45
+  - name: claude-oven-v0-4       # honly models must have labels starting with "honly_"
+    type: api
+    label: honly_sonnet4
+```
+
+`submit_evals.sh` handles:
+- `--all` (default) / `--honly` / `--no-honly` model filtering
+- `-n N` for API job concurrency throttling via slurm dependency chaining (omit for no throttling)
+- vLLM jobs are always submitted immediately (no chaining)
+- API key swapping for `honly_*` models (`ANTHROPIC_API_KEY_HONLY`)
+- Results saved to `<experiment_dir>/results/`, logs to `<experiment_dir>/logs/`
+
+**If the experiment does NOT involve evals** (e.g., training runs), write a custom submission script instead.
 
 ### `2_analyze.sh`
 ```bash
