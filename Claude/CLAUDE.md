@@ -2,12 +2,12 @@
 This workspace is located on a shared Runpod instant cluster. I've described the basics below; for more detailed info on how to use the cluster, see the guide in `/workspace-vast/bsosis/git/dotfiles/RUNPOD_INFRASTRUCTURE_GUIDE.md` -- refer to this whenever I ask you how to do anything complex on the cluster.
 
 ## Directory Structure
-The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. Code is contained in `/workspace-vast/bsosis/git`; `/workspace-vast/bsosis/logs` contains most (though not all) logs. 
+The home directory `/home/bsosis` (my username) should not be used for persistent storage, since it is not mirrored across nodes. Instead, anything that needs to be stored persistently should go in `/workspace-vast/bsosis`. Code is contained in `/workspace-vast/bsosis/git`; `/workspace-vast/bsosis/logs` contains some logs but most logs end up in a `logs` subdirectory of the directory experiments are run in. `/workspace-vast/bsosis/experiments` contains directories for structured experimental runs; it will often be symlinked inside repo directories to allow easy access. `/workspace-vast/shared_honly` contains certain files shared with my collaborator.
 
 Generally, you should confine file searches/`find` commands to the project directory (or to the logs directory, if relevant). I'll almost always run you in the directory for a particular repo, and everything you need should be in that directory. Searching through `/workspace-vast/bsosis` or `/workspace-vast/bsosis/git` will turn up a lot of false positives from other projects or worktrees, and `/home/bsosis` will generally contain only temporary files. 
 
 ## Compute
-The cluster consists of 24 nodes of 8xH200.
+The cluster consists of 32 nodes of 8xH200.
 
 ## Environment Configuration
 I've set up dotfiles with many important environment variables. See `/workspace-vast/bsosis/git/dotfiles/deploy_cluster.sh` for configuration info if needed; this script writes the environment variables to `/workspace-vast/bsosis/.cluster_env.sh`, ensures it gets sourced, and sets up various important directories in `/workspace-vast/bsosis`.
@@ -33,7 +33,7 @@ In most cases you'll want to use high or low priority on general -- most of the 
 
 Important: you should NEVER export CUDA_VISIBLE_DEVICES yourself; slurm does this for you. Overwriting this will cause slurm to land jobs on GPUs that might be utilized causing all jobs to drain into that slot and crash.
 
-In most cases, you should not run slurm jobs -- or any code that uses a GPU -- yourself, unless I specifically request it. I'd rather manage the slurm calls to make sure they don't conflict with anyone else on the cluster.
+In most cases, you should not run slurm jobs -- or any code that uses a GPU -- yourself, unless I specifically request it. I'd rather manage the slurm calls to make sure they don't conflict with anyone else on the cluster. It's fine if I explicitly ask you to run a job, though, and if you're unsure it's fine to confirm with me first.
 
 ## Secrets Management
 API keys are managed via Bitwarden CLI. Run `load_secrets` once per shell session (prompts for master password), then secrets are available as environment variables. For SLURM jobs, use `sbatch --export=ALL` or the `sbatch-secure` wrapper which auto-prompts if secrets aren't loaded.
