@@ -80,12 +80,16 @@ grep -c '"response": null' <file>
 grep -c '"response":""' <file>
 ```
 
+Before doing this, check the results file to see exactly how model responses are formatted so you can search properly.
+
 **b) Check for judge/classification failures:**
 Look for lines where judgment fields are empty or indicate failure:
 - `classification` is empty, null, or missing
 - `judgment` is empty, null, or missing
 - `score` is null or missing (when expected)
 - Any field containing "error" or "Error" in judge output
+
+Before doing this, check the results file to see exactly how judge responses are formatted so you can search properly.
 
 **c) Check for missing expected results:**
 Cross-reference the models and evals from `config.yaml` against what actually exists in `results/`. Flag any expected model/eval combinations that have no results directory or no result files.
