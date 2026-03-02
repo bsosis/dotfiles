@@ -59,6 +59,8 @@ sacct -u $USER --name=<job-name-pattern> --format=JobID,JobName%40,State,ExitCod
 
 Categorize jobs as: RUNNING, PENDING, COMPLETED, FAILED, TIMEOUT, CANCELLED, PREEMPTED, or other.
 
+**Important:** `sacct` can report stale state (e.g., showing jobs as RUNNING after they've already finished). Always cross-check with `squeue -u $USER` to get the ground truth on what's currently running. If a job shows RUNNING in `sacct` but is absent from `squeue`, it has already completed (or been killed) — re-query `sacct` or check its results to confirm.
+
 ### 5. Check results for completeness and failures
 
 List the contents of the `results/` directory. For each eval/model combination found:
