@@ -33,6 +33,8 @@ In most cases you'll want to use high or low priority on general -- most of the 
 
 Important: you should NEVER export CUDA_VISIBLE_DEVICES yourself; slurm does this for you. Overwriting this will cause slurm to land jobs on GPUs that might be utilized causing all jobs to drain into that slot and crash.
 
+Important: SLURM copies batch scripts to a spool directory (`/var/spool/slurmd/...`) before executing them. This means `BASH_SOURCE[0]`, `$0`, and `dirname`-based path resolution inside a SLURM script will point to the spool copy, NOT the original file location. Do not use these to locate sibling files (e.g. Python scripts in the same directory). Instead, either use `$SLURM_SUBMIT_DIR` (the directory where `sbatch` was called) or pass the original directory as an environment variable from the submission script (e.g. `EXP_DIR="$SCRIPT_DIR" sbatch --export=ALL ...`).
+
 In most cases, you should not run slurm jobs -- or any code that uses a GPU -- yourself, unless I specifically request it. I'd rather manage the slurm calls to make sure they don't conflict with anyone else on the cluster. It's fine if I explicitly ask you to run a job, though, and if you're unsure it's fine to confirm with me first.
 
 ## Secrets Management
