@@ -9,7 +9,7 @@ Create a new experiment folder with standard structure, config, and stub scripts
 
 ## Arguments
 
-$ARGUMENTS = experiment name (e.g., "gpqa_sweep" or "sdft_v3_ablation")
+$ARGUMENTS = experiment name (e.g., "gpqa_sweep" or "sdft_v3_ablation"), experiment description (optional)
 
 ## Steps
 
@@ -29,11 +29,8 @@ $ARGUMENTS = experiment name (e.g., "gpqa_sweep" or "sdft_v3_ablation")
 Date: YYYY-MM-DD
 Author: <git user.name>
 
-## Goal
-<ask user for 1-2 sentence goal>
-
-## Hypothesis
-<ask user>
+## Description
+<if not provided in initial prompt, ask user for 1-2 sentence description>
 
 ## Key Results
 <!-- to be filled after experiment completes -->
@@ -50,7 +47,7 @@ Do NOT include boilerplate fields that aren't relevant. Keep it minimal.
 
 ### `1_submit_all.sh`
 
-**If the experiment involves running evals**, this should be a thin wrapper that calls the generic `experiments/submit_evals.sh` script:
+**If the experiment involves running evals**, this should often (but not always) be a thin wrapper that calls the generic `experiments/submit_evals.sh` script:
 
 ```bash
 #!/bin/bash
