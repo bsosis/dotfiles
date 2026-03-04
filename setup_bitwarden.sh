@@ -88,6 +88,7 @@ PREDEFINED_MAPPINGS=(
     "ANTHROPIC_API_KEY_LOW:AnthropicKeyLow"
     "ANTHROPIC_API_KEY_HIGH:AnthropicKeyHigh"
     "ANTHROPIC_API_KEY_HONLY:AnthropicKeyHOnly"
+    "ANTHROPIC_API_KEY_FT:AnthropicKeyFT"
     "OPENAI_API_KEY:OpenAIKey"
     "OPENROUTER_API_KEY:OpenRouterKey"
     "TOGETHER_API_KEY:TogetherKey"

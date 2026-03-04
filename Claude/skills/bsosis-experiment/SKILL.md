@@ -40,7 +40,7 @@ Author: <git user.name>
 ```yaml
 # Experiment: <name>
 # Date: YYYY-MM-DD
-# Goal: <from user>
+# Description: <from user>
 ```
 Populate with whatever parameters are relevant to the experiment based on user description.
 Do NOT include boilerplate fields that aren't relevant. Keep it minimal.
@@ -85,6 +85,8 @@ models:
 - Results saved to `<experiment_dir>/results/`, logs to `<experiment_dir>/logs/`
 
 **If the experiment does NOT involve evals** (e.g., training runs), write a custom submission script instead.
+
+Note, if the submission script is fairly complex you may want to use a Python script `1_submit_all.py` rather than a shell script.
 
 ### `2_analyze.sh`
 ```bash
