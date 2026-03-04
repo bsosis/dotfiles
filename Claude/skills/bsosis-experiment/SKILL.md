@@ -45,6 +45,8 @@ Author: <git user.name>
 Populate with whatever parameters are relevant to the experiment based on user description.
 Do NOT include boilerplate fields that aren't relevant. Keep it minimal.
 
+The submission and evaluation scripts below should load all relevant arguments from the config file; do not hard-code values in the scripts.
+
 ### `1_submit_all.sh`
 
 **If the experiment involves running evals**, this should often (but not always) be a thin wrapper that calls the generic `experiments/submit_evals.sh` script:
