@@ -108,6 +108,8 @@ echo "=== Date: $(date -Iseconds) ==="
    Experiment scaffolded: experiments/YYMMDD_<name>/
    (at /workspace-vast/$USER/experiments/YYMMDD_<name>/)
 
+   Run `/rename YYMMDD_<name>` to label this session.
+
    Next steps:
    1. Edit config.yaml with your parameters
    2. Fill in 1_submit_all.sh with submission commands
