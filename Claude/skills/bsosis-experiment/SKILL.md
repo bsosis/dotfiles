@@ -99,16 +99,25 @@ echo "=== Experiment: $SCRIPT_DIR ==="
 echo "=== Date: $(date -Iseconds) ==="
 ```
 
+### Experimental Tips
+- We will often run evaluations in both thinking and non-thinking mode; by default you should usually set up the experiment scripts to run both in parallel jobs. If uncertain, ask the user.
+- The evaluation harness `src/evals/run_all.py` (and other scripts that call it) supports flags `medium` and `quick` with different preset parameters for the different evals. Usually `quick` is used for evaluating many different training checkpoints or during hyperparameter sweeps, while `medium` is used for thoroughly evaluating the best checkpoints or baseline models. If uncertain, ask the user.
+- You should generally set the slurm quality of service to `high` to avoid preemption. In some cases when running large numbers of API jobs it may be desirable to use `low`, but VLLM jobs should almost always use `high` since startup times for the VLLM server make restarts very time-consuming.
+
 4. **Make scripts executable**: `chmod +x` on all `.sh` files
 
 5. **Do NOT create a git branch** — experiments are personal and untracked.
 
 6. **Print next steps**:
+Include a reminder to label the current Claude Code session using `/rename`. Also include notes on the important configuration choices you made.
+
+Representative example (edit as needed):
    ```
    Experiment scaffolded: experiments/YYMMDD_<name>/
    (at /workspace-vast/$USER/experiments/YYMMDD_<name>/)
 
    Run `/rename YYMMDD_<name>` to label this session.
+   Evaluations run in both thinking and non-thinking mode with `medium` preset and `qos=high`.
 
    Next steps:
    1. Edit config.yaml with your parameters
