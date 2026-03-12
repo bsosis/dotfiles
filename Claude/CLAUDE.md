@@ -41,7 +41,7 @@ In most cases, you should not run slurm jobs -- or any code that uses a GPU -- y
 Anthropic finetuning API docs and practical notes are in `/workspace-vast/bsosis/docs/api_finetuning/`. Consult `NOTES.md` there for known gotchas (beta header, API key, status codes) before writing finetuning code.
 
 ## Secrets Management
-API keys are managed via Bitwarden CLI. Run `load_secrets` once per shell session (prompts for master password), then secrets are available as environment variables. For SLURM jobs, use `sbatch --export=ALL` or the `sbatch-secure` wrapper which auto-prompts if secrets aren't loaded.
+API keys are managed via Bitwarden CLI. My workflow is to run `load_secrets` once per shell session (prompts for master password), then secrets are available as environment variables. (My collaborator has a different workflow, so don't refer to `load_secrets` in shared code.) For SLURM jobs, use `sbatch --export=ALL` or the `sbatch-secure` wrapper which auto-prompts if secrets aren't loaded.
 
 ## VLLM and accelerate
 Sometimes VLLM and accelerate don't clean up properly (especially if the slurm job is preempted or hits a time limit), which can cause issues on the cluster. When using either, you should capture the PID and make sure it gets killed properly on exit. (Note, make sure you don't kill any other user's processes!)
