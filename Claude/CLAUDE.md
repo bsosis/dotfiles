@@ -65,7 +65,7 @@ Some conventions I prefer:
 - We generally want code to "fail fast": if there's a problem of any sort, we want to hit it as early as possible *and halt* so we can fix it
     - This means, among other things, that excessive try-except blocks are undesirable: we generally want stop the experiment if it's in a suboptimal state
     - Similarly, you should generally default to throwing errors in response to issues, rather than just printing warnings (and certainly not silently ignoring the issue!)
-- When using LLM judges or similar, default to using Anthropic's API. Use `claude-sonnet-4-5` or `claude-opus-4-6`, as these should refer to the latest models.
+- When using LLM judges or similar, default to using Anthropic's API. Use `claude-haiku-4-5`, `claude-sonnet-4-6` or `claude-opus-4-6`, as these should refer to the latest models.
 - When using any API, you should add a check to verify that the appropriate API key is available, and throw an error if not
     - Try to put this as early in the code as possible: we want the code to fail quickly if there's a problem so we can fix it and rerun.
 - If these style conventions conflict with those used by other files in the repo, you should default to following the other files in the repo, as this is a shared project and these are just my personal preferences.
