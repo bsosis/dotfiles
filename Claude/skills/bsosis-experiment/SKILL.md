@@ -99,6 +99,8 @@ echo "=== Experiment: $SCRIPT_DIR ==="
 echo "=== Date: $(date -Iseconds) ==="
 ```
 
+If there are standard plotting scripts for the evals used, the analysis script should run them. Otherwise, you can implement a bespoke plotting script for the experiment (if there is an obvious way to plot the data), simply print out some summary metrics, or ask the user.
+
 ### Experimental Tips
 - We will often run evaluations in both thinking and non-thinking mode; by default you should usually set up the experiment scripts to run both in parallel jobs. If uncertain, ask the user.
 - The evaluation harness `src/evals/run_all.py` (and other scripts that call it) supports flags `medium` and `quick` with different preset parameters for the different evals. Usually `quick` is used for evaluating many different training checkpoints or during hyperparameter sweeps, while `medium` is used for thoroughly evaluating the best checkpoints or baseline models. If uncertain, ask the user.
