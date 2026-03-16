@@ -94,6 +94,7 @@ PREDEFINED_MAPPINGS=(
     "TOGETHER_API_KEY:TogetherKey"
     "HF_TOKEN:HFToken"
     "GH_TOKEN:GitHubToken"
+    "TINKER_API_KEY:TinkerKey"
 )
 
 # Load existing mappings if present
