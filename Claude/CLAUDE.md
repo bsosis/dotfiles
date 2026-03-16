@@ -38,7 +38,7 @@ Important: SLURM copies batch scripts to a spool directory (`/var/spool/slurmd/.
 In most cases, you should not run slurm jobs -- or any code that uses a GPU -- yourself, unless I specifically request it. I'd rather manage the slurm calls to make sure they don't conflict with anyone else on the cluster. It's fine if I explicitly ask you to run a job, though, and if you're unsure it's fine to confirm with me first.
 
 ## API Documentation
-Anthropic finetuning API docs and practical notes are in `/workspace-vast/bsosis/docs/api_finetuning/`. Consult `NOTES.md` there for known gotchas (beta header, API key, status codes) before writing finetuning code.
+Anthropic finetuning API docs and practical notes are in `/workspace-vast/bsosis/docs/api_finetuning/`. Consult `NOTES.md` there for known gotchas (beta header, API key, status codes) before writing finetuning code. Alternatively, check out the documentation in the `finetuning-api` skill.
 
 ## Secrets Management
 API keys are managed via Bitwarden CLI. My workflow is to run `load_secrets` once per shell session (prompts for master password), then secrets are available as environment variables. (My collaborator has a different workflow, so don't refer to `load_secrets` in shared code.) For SLURM jobs, use `sbatch --export=ALL` or the `sbatch-secure` wrapper which auto-prompts if secrets aren't loaded.
