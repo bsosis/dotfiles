@@ -33,9 +33,11 @@ In most cases you'll want to use high or low priority on general -- most of the 
 
 Important: you should NEVER export CUDA_VISIBLE_DEVICES yourself; slurm does this for you. Overwriting this will cause slurm to land jobs on GPUs that might be utilized causing all jobs to drain into that slot and crash.
 
-Important: SLURM copies batch scripts to a spool directory (`/var/spool/slurmd/...`) before executing them. This means `BASH_SOURCE[0]`, `$0`, and `dirname`-based path resolution inside a SLURM script will point to the spool copy, NOT the original file location. Do not use these to locate sibling files (e.g. Python scripts in the same directory). Instead, either use `$SLURM_SUBMIT_DIR` (the directory where `sbatch` was called) or pass the original directory as an environment variable from the submission script (e.g. `EXP_DIR="$SCRIPT_DIR" sbatch --export=ALL ...`).
+SLURM copies batch scripts to a spool directory (`/var/spool/slurmd/...`) before executing them. This means `BASH_SOURCE[0]`, `$0`, and `dirname`-based path resolution inside a SLURM script will point to the spool copy, NOT the original file location. Do not use these to locate sibling files (e.g. Python scripts in the same directory). Instead, either use `$SLURM_SUBMIT_DIR` (the directory where `sbatch` was called) or pass the original directory as an environment variable from the submission script (e.g. `EXP_DIR="$SCRIPT_DIR" sbatch --export=ALL ...`).
 
-Important: Do not pass variables with spaces or empty values inline in `--export=ALL,VAR1=val1,VAR2=val2,...`. SLURM's comma-delimited parser can silently break on spaces or empty strings, causing the job to produce no output at all. Instead, `export` the variables before the `sbatch` call and use just `--export=ALL`.
+Do not pass variables with spaces or empty values inline in `--export=ALL,VAR1=val1,VAR2=val2,...`. SLURM's comma-delimited parser can silently break on spaces or empty strings, causing the job to produce no output at all. Instead, `export` the variables before the `sbatch` call and use just `--export=ALL`.
+
+When a SLURM job script runs a Python script from an experiment directory that imports from the project's `src` package, Python won't find it even if the job script `cd`s to the project root — running a script by absolute path sets `sys.path[0]` to the script's directory, not the cwd. Use `PYTHONPATH="$PROJECT_DIR"` before the `uv run python` call to ensure the project root is on the Python path.
 
 Use `PYTHONUNBUFFERED=1` to ensure outputs are displayed immediately while scripts are running.
 
