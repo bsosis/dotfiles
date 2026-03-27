@@ -79,6 +79,11 @@ Some conventions I prefer:
 ## Reasoning Mode
 There are a couple considerations to keep in mind when running models with reasoning.
 - Qwen 3 models -- which I use often -- have reasoning enabled by default. To disable it you'll need to pass `"chat_template_kwargs": {"enable_thinking": False}` (or similar).
+- Qwen 3/3.5 chat template thinking tag behavior (important for training):
+  - `enable_thinking=True` (default): `add_generation_prompt=True` ends with `<think>\n` (opens thinking, model completes it). Full conversation text inserts `<think>\n\n</think>\n\n` before the assistant's response content.
+  - `enable_thinking=False`: `add_generation_prompt=True` ends with `<think>\n\n</think>\n\n` (closes thinking immediately). Full conversation text is identical to `enable_thinking=True`.
+  - In both modes, the full rendered conversation always contains `<think>\n\n</think>\n\n` before the response. The only difference is in the generation prompt.
+  - For prompt masking during SFT: use `enable_thinking=False` when computing the prompt-only text so the mask covers the full `<think>\n\n</think>\n\n` block. Using `enable_thinking=True` leaves `\n\n</think>\n\n` in the trained text.
 - If VLLM is run with a reasoning parser (e.g. `--reasoning-parser qwen3`), it extracts the reasoning into separate reasoning and reasoning_content fields instead of keeping `<think>` tags in the main content.
 - By default, if you write a script that starts a VLLM server, you should check if the model is a Qwen 3 model and include the reasoning parser if so.
 - Scripts that interact with existing VLLM servers (e.g. python scripts that use a given host/port, etc.) should accommodate both separate reasoning content and reasoning that's included in the main content.
