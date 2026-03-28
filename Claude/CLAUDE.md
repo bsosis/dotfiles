@@ -49,6 +49,41 @@ Anthropic finetuning API docs and practical notes are in `/workspace-vast/bsosis
 ## Secrets Management
 API keys are managed via Bitwarden CLI. My workflow is to run `load_secrets` once per shell session (prompts for master password), then secrets are available as environment variables. (My collaborator has a different workflow, so don't refer to `load_secrets` in shared code.) For SLURM jobs, use `sbatch --export=ALL` or the `sbatch-secure` wrapper which auto-prompts if secrets aren't loaded.
 
+## Qwen3.5 Version Compatibility (transformers v4 vs v5)
+
+Qwen3.5 models (`Qwen/Qwen3.5-*`) require transformers>=5.0, but vLLM 0.18 pins transformers<5. This creates a cascade of incompatibilities across training, merging, and serving. Here's a summary of all the issues and their solutions.
+
+**Issue 1: Training — `KeyError: 'qwen3_5'` when loading model**
+- Cause: The `qwen3_5` model type only exists in transformers>=5. The main project venv has vllm which pins transformers<5.
+- uv resolves all extras universally, so you can't have a `training` extra without vllm — it will still try to satisfy vllm's transformers<5 constraint.
+- Solution: Create a separate `.venv-training` without vllm. Install torch from the cu128 index (matching the cluster's CUDA 12.8 drivers — the default pip resolution gets cu130 which is too new), then install training deps from a `requirements-training.txt`.
+- See `experiments/260326_train_qwen_base_templates/1_submit_all.sh` for the venv setup pattern.
+
+**Issue 2: Merging — same `KeyError` when loading model for LoRA merge**
+- Cause: `slurm/merge_lora.sh` uses `uv run --extra gpu` which pulls in vllm → transformers<5.
+- Solution: Use the training venv for merging too. Create an experiment-local `merge_lora.sh` that uses `$PROJECT_DIR/.venv-training/bin/python` instead of `uv run`.
+
+**Issue 3: Serving merged model — `model_type 'qwen3_5_text' not recognized`**
+- Cause: `AutoModelForCausalLM` loads the text-only sub-model of Qwen3.5 (which is a multimodal architecture). transformers>=5 saves this with `model_type: qwen3_5_text` and `architectures: ['Qwen3_5ForCausalLM']`. vLLM's `_CONFIG_REGISTRY` maps `qwen3_5` but NOT `qwen3_5_text`, so it falls through to `AutoConfig.from_pretrained()` which uses transformers<5 and fails.
+- Why not just use `model_type: qwen3_5`? Because that triggers vLLM's multimodal model class (`Qwen3_5ForConditionalGeneration`), which instantiates a vision encoder and then fails with "weights not initialized" because the merged model only has text weights.
+
+**Issue 4: Tokenizer — `Tokenizer class TokenizersBackend does not exist`**
+- Cause: transformers>=5 saves `tokenizer_class: TokenizersBackend` in `tokenizer_config.json`, but transformers<5 (bundled with vLLM) doesn't have this class. The original HF model uses `Qwen2Tokenizer`.
+
+**Combined solution for Issues 3-4: Make the merged model look like the original HF checkpoint.**
+Since LoRA only changes weights (not architecture/tokenizer), the merge script should:
+1. Merge LoRA weights normally (produces text-only `model.safetensors`)
+2. Copy all non-weight metadata from the original HF model: `config.json`, `tokenizer.json`, `tokenizer_config.json`, `preprocessor_config.json`, etc.
+3. Symlink the original's weight shards into the merged directory (for vision/mtp weights that the multimodal config expects)
+4. Build a combined `model.safetensors.index.json` that points text weights to the merged file and vision/mtp weights to the original shards
+
+This way vLLM sees `model_type: qwen3_5`, loads the multimodal model class, finds all expected weights (text from merged file, vision from original shards), and everything works. The vision encoder loads into memory but sits unused. See `experiments/260326_train_qwen_base_templates/merge_lora.sh` for the full implementation.
+
+**Key takeaway:** When training+merging Qwen3.5 with LoRA, you need three things:
+1. A separate venv without vllm for training and merging (transformers>=5)
+2. A merge post-processing step that reconstructs a complete HF checkpoint compatible with vLLM's transformers<5
+3. The original HF model cached locally (for metadata and vision weight shards)
+
 ## VLLM and accelerate
 Sometimes VLLM and accelerate don't clean up properly (especially if the slurm job is preempted or hits a time limit), which can cause issues on the cluster. When using either, you should capture the PID and make sure it gets killed properly on exit. (Note, make sure you don't kill any other user's processes!)
 
