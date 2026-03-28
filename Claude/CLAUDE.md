@@ -84,6 +84,8 @@ This way vLLM sees `model_type: qwen3_5`, loads the multimodal model class, find
 2. A merge post-processing step that reconstructs a complete HF checkpoint compatible with vLLM's transformers<5
 3. The original HF model cached locally (for metadata and vision weight shards)
 
+**Alternative: LoRA serving** (skip merging entirely) with `--enable-lora --lora-modules label=path --max-lora-rank 16` on the base model. Simpler but ~5-15% slower inference and adds warnings about visual layer LoRA being ignored.
+
 ## VLLM and accelerate
 Sometimes VLLM and accelerate don't clean up properly (especially if the slurm job is preempted or hits a time limit), which can cause issues on the cluster. When using either, you should capture the PID and make sure it gets killed properly on exit. (Note, make sure you don't kill any other user's processes!)
 
